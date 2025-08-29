@@ -177,6 +177,40 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Footer with attribution */}
+      <footer className="bg-white border-t border-gray-100 py-3 px-4 flex-shrink-0">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-1">
+            <span>Powered by</span>
+            <span className="font-medium text-gray-700">OpenAI Realtime API</span>
+            <span>&</span>
+            <span className="font-medium text-gray-700">Google Gemini 2.5 Flash Image 🍌</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>Built by</span>
+            <span className="font-medium text-gray-700">Abhi Pillai</span>
+            <span className="text-gray-400">•</span>
+            <a 
+              href="https://twitter.com/abhiondemand" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Twitter
+            </a>
+            <span className="text-gray-400">•</span>
+            <a 
+              href="https://linkedin.com/in/abhipillai1" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
