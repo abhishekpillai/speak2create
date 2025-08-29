@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { RealtimeClient } from '@/lib/openai-realtime';
 
@@ -61,6 +61,23 @@ export default function VoiceControl({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isListening, isConnecting]);
 
+  // Add a ref to track current image state for the realtime client
+  const currentImageRef = useRef(currentImage);
+  useEffect(() => {
+    currentImageRef.current = currentImage;
+    console.log('🖼️ currentImage updated in VoiceControl:', !!currentImage);
+  }, [currentImage]);
+
+  // Refs to always use the latest callbacks in realtime handlers
+  const onImageEditRef = useRef(onImageEdit);
+  const onImageGenerateRef = useRef(onImageGenerate);
+  useEffect(() => {
+    onImageEditRef.current = onImageEdit;
+  }, [onImageEdit]);
+  useEffect(() => {
+    onImageGenerateRef.current = onImageGenerate;
+  }, [onImageGenerate]);
+
   useEffect(() => {
     if (onListeningChange) {
       onListeningChange(isListening);
@@ -111,7 +128,8 @@ export default function VoiceControl({
     draw();
   };
 
-  const startListening = async () => {
+  const startListening = useCallback(async () => {
+    console.log('🔄 startListening recreated with currentImage:', !!currentImage);
     try {
       setIsConnecting(true);
       setStatus('Connecting...');
@@ -189,17 +207,28 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       });
 
       client.setOnFunctionCall(async (name, args) => {
+        const hasImage = !!currentImageRef.current;
+        console.log('🔧 Function call received:', { name, args, currentImage: hasImage });
+
         if (name === 'generate_image') {
+          console.log('🎨 Calling generate_image with prompt:', args.prompt);
           setStatus('Generating image...');
-          await onImageGenerate(args.prompt);
+          await onImageGenerateRef.current(args.prompt);
           setStatus('Image generated!');
           return { success: true };
-        } else if (name === 'edit_image' && currentImage) {
-          setStatus('Editing image...');
-          await onImageEdit(args.instruction);
-          setStatus('Image edited!');
-          return { success: true };
+        } else if (name === 'edit_image') {
+          if (hasImage) {
+            console.log('✏️ Calling edit_image with instruction:', args.instruction);
+            setStatus('Editing image...');
+            await onImageEditRef.current(args.instruction);
+            setStatus('Image edited!');
+            return { success: true };
+          } else {
+            console.warn('⚠️ Edit called but no current image exists');
+            return { success: false, error: 'No image to edit' };
+          }
         }
+        console.warn('❌ Unknown function call:', name);
         return { success: false, error: 'Function not available' };
       });
 
@@ -218,7 +247,7 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       setStatus('Failed to connect. Please try again.');
       setIsConnecting(false);
     }
-  };
+  }, [onImageEdit, onImageGenerate, currentImage]);
 
   const stopListening = () => {
     if (clientRef.current) {
