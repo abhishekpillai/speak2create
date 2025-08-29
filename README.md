@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# speak2create
 
-## Getting Started
+Transform your voice into stunning images with AI-powered generation. Simply speak what you imagine and watch it come to life.
 
-First, run the development server:
+## Features
 
+- 🎤 **Natural Voice Commands** - Just speak what you want to create
+- 🎨 **AI Image Generation** - Powered by Google Gemini 2.5 Flash
+- ✏️ **Voice-Controlled Editing** - Refine images with follow-up commands
+- 🚀 **Real-time Processing** - WebRTC connection for instant voice streaming
+- 💾 **Save & Download** - Export your creations with one click
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Voice Processing**: OpenAI Realtime API (WebRTC)
+- **Image Generation**: Google Gemini 2.5 Flash Image Preview
+- **Deployment**: Vercel-ready
+
+## Prerequisites
+
+You'll need API keys for:
+- OpenAI (for Realtime voice API)
+- Google Gemini (for image generation)
+
+## Setup
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/speak2create.git
+cd speak2create
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configure environment variables:
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edit `.env.local` and add your API keys:
+```
+OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-## Learn More
+4. Run the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Click "Start Speaking" to begin
+2. Describe the image you want to create
+3. Watch as your voice transforms into an image
+4. Continue speaking to edit and refine your creation
+5. Save or download when you're happy with the result
 
-## Deploy on Vercel
+### Example Voice Commands
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**For Generation:**
+- "Create a sunset over mountains with purple clouds"
+- "Generate a cute robot playing in a garden"
+- "Make a logo for a coffee shop called Bean Dreams"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**For Editing (after an image exists):**
+- "Make the sky more vibrant"
+- "Add a rainbow in the background"
+- "Change the color to blue"
+- "Remove the clouds"
+
+## Architecture
+
+```
+speak2create/
+├── app/
+│   ├── api/
+│   │   ├── session/     # OpenAI token management
+│   │   ├── generate/    # Image generation endpoint
+│   │   └── edit/        # Image editing endpoint
+│   └── page.tsx         # Main application
+├── components/
+│   ├── VoiceControl.tsx # Voice input & WebRTC
+│   └── ImageDisplay.tsx # Image viewer & controls
+├── lib/
+│   ├── openai-realtime.ts # WebRTC connection handler
+│   └── gemini.ts          # Gemini API wrapper
+└── public/
+```
+
+## API Costs
+
+Estimated per 5-minute session:
+- Voice input: ~$0.30
+- Voice output: ~$1.20  
+- Image generation: ~$0.12 (3 images)
+- **Total**: ~$1.62 per session
+
+## Deployment
+
+The app is configured for easy deployment on Vercel:
+
+```bash
+vercel deploy
+```
+
+Make sure to add your environment variables in the Vercel dashboard.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
+
+## Acknowledgments
+
+- OpenAI for the Realtime API
+- Google for Gemini image generation
+- The Next.js team for an amazing framework
