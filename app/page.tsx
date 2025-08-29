@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import VoiceControl from '@/components/VoiceControl';
-import ImageDisplay from '@/components/ImageDisplay';
-import { Sparkles } from 'lucide-react';
+import { useState } from "react";
+import VoiceControl from "@/components/VoiceControl";
+import ImageDisplay from "@/components/ImageDisplay";
+import { Sparkles } from "lucide-react";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -14,24 +14,24 @@ export default function Home() {
   const handleImageGenerate = async (prompt: string) => {
     try {
       setIsLoading(true);
-      
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
-          session_id: sessionId
-        })
+          session_id: sessionId,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate image');
+        throw new Error("Failed to generate image");
       }
 
       const data = await response.json();
       setCurrentImage(data.imageUrl);
     } catch (error) {
-      console.error('Image generation error:', error);
+      console.error("Image generation error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -39,28 +39,28 @@ export default function Home() {
 
   const handleImageEdit = async (instruction: string) => {
     if (!currentImage) return;
-    
+
     try {
       setIsLoading(true);
-      
-      const response = await fetch('/api/edit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+      const response = await fetch("/api/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           image_data: currentImage,
           edit_instruction: instruction,
-          session_id: sessionId
-        })
+          session_id: sessionId,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to edit image');
+        throw new Error("Failed to edit image");
       }
 
       const data = await response.json();
       setCurrentImage(data.imageUrl);
     } catch (error) {
-      console.error('Image editing error:', error);
+      console.error("Image editing error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -83,17 +83,21 @@ export default function Home() {
               speak2create
             </h1>
           </div>
-          <p className="text-xs text-gray-500 hidden sm:block">Voice-powered image generation</p>
+          <p className="text-xs text-gray-500 hidden sm:block">
+            Voice-powered image generation
+          </p>
         </div>
       </header>
 
       {/* Main Content - Centered Stack */}
-      <main className="flex-1 flex items-center justify-center p-4 min-h-0">
+      <main className="flex-1 flex items-center justify-center p-4 py-8 min-h-0">
         <div className="w-full max-w-6xl flex gap-8 items-center">
           {/* Left Side - Try Saying Tips */}
           <div className="hidden lg:block w-48 flex-shrink-0">
             <div className="space-y-3">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Try saying</p>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+                Try saying
+              </p>
               <div className="space-y-2">
                 <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
                   "Generate a sunset over mountains"
@@ -111,14 +115,16 @@ export default function Home() {
           </div>
 
           {/* Center - Main Content */}
-          <div className="flex-1 flex flex-col items-center max-w-3xl mx-auto">
+          <div className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto">
             {/* Title */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-4 mt-4">
               <h2 className="text-4xl font-semibold text-gray-900 mb-2">
-                {currentImage ? 'Your Creation' : 'Speak Your Vision'}
+                {currentImage ? "Your Creation" : "Speak Your Vision"}
               </h2>
               <p className="text-base text-gray-500">
-                {currentImage ? 'Edit with voice or save your masterpiece' : 'Just describe what you want to see'}
+                {currentImage
+                  ? "Edit with voice or save your masterpiece"
+                  : "Just describe what you want to see"}
               </p>
             </div>
 
@@ -158,7 +164,9 @@ export default function Home() {
           {/* Right Side - Additional Tips */}
           <div className="hidden lg:block w-48 flex-shrink-0">
             <div className="space-y-3">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Quick tips</p>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+                Quick tips
+              </p>
               <div className="space-y-2 text-xs text-gray-600">
                 <div className="flex items-start gap-2">
                   <span className="text-gray-400">→</span>
@@ -183,26 +191,30 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <span>Powered by</span>
-            <span className="font-medium text-gray-700">OpenAI Realtime API</span>
+            <span className="font-medium text-gray-700">
+              OpenAI Realtime API
+            </span>
             <span>&</span>
-            <span className="font-medium text-gray-700">Google Gemini 2.5 Flash Image 🍌</span>
+            <span className="font-medium text-gray-700">
+              Google Gemini 2.5 Flash Image 🍌
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <span>Built by</span>
             <span className="font-medium text-gray-700">Abhi Pillai</span>
             <span className="text-gray-400">•</span>
-            <a 
-              href="https://twitter.com/abhiondemand" 
-              target="_blank" 
+            <a
+              href="https://twitter.com/abhiondemand"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               Twitter
             </a>
             <span className="text-gray-400">•</span>
-            <a 
-              href="https://linkedin.com/in/abhipillai1" 
-              target="_blank" 
+            <a
+              href="https://linkedin.com/in/abhipillai1"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
