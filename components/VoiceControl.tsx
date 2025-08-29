@@ -91,12 +91,18 @@ export default function VoiceControl({
       // Initialize realtime client
       const client = new RealtimeClient({
         voice: 'alloy',
-        instructions: 'You are a creative assistant helping users generate and edit images through natural voice commands. Listen carefully and use the appropriate function to either generate new images or edit existing ones.',
+        instructions: `You are integrated into a visual interface where images are automatically displayed to the user. When you call the generate_image or edit_image functions, the resulting images appear instantly on their screen. Your role is to:
+1. Listen to voice commands and immediately call the appropriate function
+2. Briefly confirm what action you're taking (e.g., 'Generating your sunset image...')
+3. NEVER describe what the image looks like - the user can see it
+4. NEVER say you can't display images - they ARE displayed automatically
+5. After function calls, just confirm completion (e.g., 'Done!' or 'Your image is ready!')
+Keep responses very brief since this is a voice interface.`,
         tools: [
           {
             type: 'function',
             name: 'generate_image',
-            description: 'Generate a new image based on the user description',
+            description: 'Generate a new image that will be automatically displayed on the user\'s screen',
             parameters: {
               type: 'object',
               properties: {
@@ -115,7 +121,7 @@ export default function VoiceControl({
           {
             type: 'function',
             name: 'edit_image',
-            description: 'Edit the current image based on user instructions',
+            description: 'Edit the current displayed image - changes will appear automatically on screen',
             parameters: {
               type: 'object',
               properties: {
