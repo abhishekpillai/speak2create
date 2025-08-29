@@ -68,6 +68,16 @@ export default function VoiceControl({
     console.log('🖼️ currentImage updated in VoiceControl:', !!currentImage);
   }, [currentImage]);
 
+  // Refs to always use the latest callbacks in realtime handlers
+  const onImageEditRef = useRef(onImageEdit);
+  const onImageGenerateRef = useRef(onImageGenerate);
+  useEffect(() => {
+    onImageEditRef.current = onImageEdit;
+  }, [onImageEdit]);
+  useEffect(() => {
+    onImageGenerateRef.current = onImageGenerate;
+  }, [onImageGenerate]);
+
   useEffect(() => {
     if (onListeningChange) {
       onListeningChange(isListening);
@@ -199,18 +209,18 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       client.setOnFunctionCall(async (name, args) => {
         const hasImage = !!currentImageRef.current;
         console.log('🔧 Function call received:', { name, args, currentImage: hasImage });
-        
+
         if (name === 'generate_image') {
           console.log('🎨 Calling generate_image with prompt:', args.prompt);
           setStatus('Generating image...');
-          await onImageGenerate(args.prompt);
+          await onImageGenerateRef.current(args.prompt);
           setStatus('Image generated!');
           return { success: true };
         } else if (name === 'edit_image') {
           if (hasImage) {
             console.log('✏️ Calling edit_image with instruction:', args.instruction);
             setStatus('Editing image...');
-            await onImageEdit(args.instruction);
+            await onImageEditRef.current(args.instruction);
             setStatus('Image edited!');
             return { success: true };
           } else {
