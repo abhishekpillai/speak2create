@@ -60,13 +60,13 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
     // Centered layout - smaller image, stacked controls
     if (isLoading) {
       return (
-        <div className="aspect-[4/3] flex items-center justify-center bg-white rounded-xl shadow-lg border border-purple-100">
+        <div className="aspect-[4/3] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="text-center space-y-3">
             <div className="relative">
-              <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
+              <Loader2 className="w-10 h-10 text-gray-400 animate-spin mx-auto" />
+              <div className="absolute inset-0 w-10 h-10 bg-gray-200 rounded-full animate-ping" />
             </div>
-            <p className="text-gray-700 font-medium">Creating your vision...</p>
+            <p className="text-gray-500 text-sm">Creating your vision...</p>
           </div>
         </div>
       );
@@ -74,10 +74,10 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
 
     if (!imageUrl) {
       return (
-        <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-dashed border-purple-200">
+        <div className="aspect-[4/3] flex items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
           <div className="text-center space-y-3">
-            <div className="p-4 bg-white rounded-full shadow-md inline-block">
-              <ImageIcon className="w-12 h-12 text-purple-400" />
+            <div className="p-3 bg-white rounded-full shadow-sm inline-block border border-gray-100">
+              <ImageIcon className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-sm text-gray-500">Your image will appear here</p>
           </div>
@@ -90,11 +90,11 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
         <div className="space-y-3">
           <div className="relative group">
             {/* Main Image */}
-            <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-xl bg-white border border-purple-100">
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border border-gray-100">
               <img
                 src={imageUrl}
                 alt="Generated image"
-                className="w-full h-full object-contain cursor-pointer bg-gray-50"
+                className="w-full h-full object-contain cursor-pointer bg-white"
                 onClick={() => setIsFullscreen(true)}
               />
             </div>
@@ -103,24 +103,24 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
             <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => setIsFullscreen(true)}
-                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                className="p-2 bg-black/80 backdrop-blur rounded-lg hover:bg-black transition-all"
                 title="Fullscreen"
               >
-                <Maximize2 className="w-4 h-4 text-gray-700" />
+                <Maximize2 className="w-4 h-4 text-white" />
               </button>
               <button
                 onClick={handleSave}
-                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                className="p-2 bg-black/80 backdrop-blur rounded-lg hover:bg-black transition-all"
                 title="Save"
               >
-                <Download className="w-4 h-4 text-gray-700" />
+                <Download className="w-4 h-4 text-white" />
               </button>
               <button
                 onClick={onClear}
-                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                className="p-2 bg-black/80 backdrop-blur rounded-lg hover:bg-black transition-all"
                 title="Clear"
               >
-                <X className="w-4 h-4 text-gray-700" />
+                <X className="w-4 h-4 text-white" />
               </button>
             </div>
           </div>
@@ -129,14 +129,14 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
           <div className="flex gap-2">
             <button
               onClick={handleSave}
-              className="flex-1 py-2 px-3 bg-purple-100 hover:bg-purple-200 rounded-lg text-sm font-medium text-purple-700 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 bg-black hover:bg-gray-900 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2"
             >
               <Download className="w-3.5 h-3.5" />
               Save
             </button>
             <button
               onClick={onClear}
-              className="flex-1 py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
             >
               <X className="w-3.5 h-3.5" />
               Clear
@@ -193,7 +193,7 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
               <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
               <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
             </div>
-            <p className="text-gray-700 font-medium">Creating your vision...</p>
+            <p className="text-gray-500 text-sm">Creating your vision...</p>
           </div>
         </div>
       );
@@ -201,10 +201,10 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
 
     if (!imageUrl) {
       return (
-        <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-dashed border-purple-200">
+        <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
           <div className="text-center space-y-3">
-            <div className="p-4 bg-white rounded-full shadow-md inline-block">
-              <ImageIcon className="w-12 h-12 text-purple-400" />
+            <div className="p-3 bg-white rounded-full shadow-sm inline-block border border-gray-100">
+              <ImageIcon className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-sm text-gray-500">Your image will appear here</p>
           </div>
@@ -221,7 +221,7 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
               <img
                 src={imageUrl}
                 alt="Generated image"
-                className="w-full h-full object-contain cursor-pointer bg-gray-50"
+                className="w-full h-full object-contain cursor-pointer bg-white"
                 onClick={() => setIsFullscreen(true)}
               />
             </div>
@@ -230,24 +230,24 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
             <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => setIsFullscreen(true)}
-                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                className="p-2 bg-black/80 backdrop-blur rounded-lg hover:bg-black transition-all"
                 title="Fullscreen"
               >
-                <Maximize2 className="w-4 h-4 text-gray-700" />
+                <Maximize2 className="w-4 h-4 text-white" />
               </button>
               <button
                 onClick={handleSave}
-                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                className="p-2 bg-black/80 backdrop-blur rounded-lg hover:bg-black transition-all"
                 title="Save"
               >
-                <Download className="w-4 h-4 text-gray-700" />
+                <Download className="w-4 h-4 text-white" />
               </button>
               <button
                 onClick={onClear}
-                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                className="p-2 bg-black/80 backdrop-blur rounded-lg hover:bg-black transition-all"
                 title="Clear"
               >
-                <X className="w-4 h-4 text-gray-700" />
+                <X className="w-4 h-4 text-white" />
               </button>
             </div>
           </div>
@@ -256,14 +256,14 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
           <div className="flex gap-2 mt-3">
             <button
               onClick={handleSave}
-              className="flex-1 py-2 px-3 bg-purple-100 hover:bg-purple-200 rounded-lg text-sm font-medium text-purple-700 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 bg-black hover:bg-gray-900 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2"
             >
               <Download className="w-3.5 h-3.5" />
               Save
             </button>
             <button
               onClick={onClear}
-              className="flex-1 py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
             >
               <X className="w-3.5 h-3.5" />
               Clear

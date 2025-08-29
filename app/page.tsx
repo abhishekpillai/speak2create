@@ -71,19 +71,19 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-indigo-50 overflow-hidden">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Compact Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-purple-100 flex-shrink-0">
+      <header className="bg-white border-b border-gray-100 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+            <div className="p-1.5 bg-black rounded-lg">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-lg font-semibold text-gray-900">
               speak2create
             </h1>
           </div>
-          <p className="text-xs text-gray-600 hidden sm:block">Voice-powered image generation</p>
+          <p className="text-xs text-gray-500 hidden sm:block">Voice-powered image generation</p>
         </div>
       </header>
 
@@ -93,16 +93,16 @@ export default function Home() {
           {/* Left Side - Try Saying Tips */}
           <div className="hidden lg:block w-48 flex-shrink-0">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Try saying:</p>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Try saying</p>
               <div className="space-y-2">
-                <div className="text-sm text-purple-600 bg-purple-50 rounded-lg p-2">
+                <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
                   "Generate a sunset over mountains"
                 </div>
-                <div className="text-sm text-purple-600 bg-purple-50 rounded-lg p-2">
+                <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
                   "Create a cute robot in a garden"
                 </div>
                 {currentImage && (
-                  <div className="text-sm text-indigo-600 bg-indigo-50 rounded-lg p-2">
+                  <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
                     "Make the sky more vibrant"
                   </div>
                 )}
@@ -114,10 +114,10 @@ export default function Home() {
           <div className="flex-1 flex flex-col items-center max-w-3xl mx-auto">
             {/* Title */}
             <div className="text-center mb-4">
-              <h2 className="text-3xl font-bold text-gray-900 mb-1">
+              <h2 className="text-4xl font-semibold text-gray-900 mb-2">
                 {currentImage ? 'Your Creation' : 'Speak Your Vision'}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-base text-gray-500">
                 {currentImage ? 'Edit with voice or save your masterpiece' : 'Just describe what you want to see'}
               </p>
             </div>
@@ -146,10 +146,10 @@ export default function Home() {
             {/* Mobile Tips - Show below on small screens */}
             <div className="lg:hidden mt-6 flex flex-wrap justify-center gap-2">
               <span className="text-xs text-gray-500">Try:</span>
-              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+              <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
                 "Generate a sunset"
               </span>
-              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+              <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
                 "Create a robot"
               </span>
             </div>
@@ -158,18 +158,18 @@ export default function Home() {
           {/* Right Side - Additional Tips */}
           <div className="hidden lg:block w-48 flex-shrink-0">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick tips:</p>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Quick tips</p>
               <div className="space-y-2 text-xs text-gray-600">
                 <div className="flex items-start gap-2">
-                  <span className="text-purple-500">•</span>
+                  <span className="text-gray-400">→</span>
                   <span>Be descriptive for better results</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-purple-500">•</span>
+                  <span className="text-gray-400">→</span>
                   <span>You can edit any generated image</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-purple-500">•</span>
+                  <span className="text-gray-400">→</span>
                   <span>Click image to view fullscreen</span>
                 </div>
               </div>

@@ -68,7 +68,7 @@ export default function VoiceControl({
       animationRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      ctx.fillStyle = 'rgba(17, 24, 39, 0.1)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const barWidth = (canvas.width / bufferLength) * 2.5;
@@ -78,11 +78,8 @@ export default function VoiceControl({
       for (let i = 0; i < bufferLength; i++) {
         barHeight = (dataArray[i] / 255) * canvas.height;
         
-        const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
-        gradient.addColorStop(0, 'rgb(147, 51, 234)');
-        gradient.addColorStop(1, 'rgb(99, 102, 241)');
-        
-        ctx.fillStyle = gradient;
+        // Modern minimal visualization
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'; // Nearly black with slight transparency
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth + 1;
       }
@@ -204,7 +201,7 @@ Keep responses very brief since this is a voice interface.`,
     return (
       <div className="w-full space-y-3">
         {/* Audio Visualizer - Slim Bar */}
-        <div className="relative h-16 bg-gray-900/5 rounded-xl overflow-hidden border border-purple-100">
+        <div className="relative h-16 bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
           <canvas
             ref={canvasRef}
             width={640}
@@ -213,7 +210,7 @@ Keep responses very brief since this is a voice interface.`,
           />
           {!isListening && !isConnecting && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-gray-400 text-xs">Audio visualization will appear here</p>
+              <p className="text-gray-400 text-xs font-light">Audio visualization</p>
             </div>
           )}
         </div>
@@ -222,12 +219,12 @@ Keep responses very brief since this is a voice interface.`,
         <button
           onClick={isListening ? stopListening : startListening}
           disabled={isConnecting}
-          className={`w-full py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-[1.02] flex items-center justify-center gap-3 ${
+          className={`w-full py-3.5 px-6 rounded-xl font-medium transition-all flex items-center justify-center gap-3 ${
             isListening
-              ? 'bg-red-500 hover:bg-red-600 text-white'
+              ? 'bg-black text-white hover:bg-gray-900'
               : isConnecting
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg'
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-black text-white hover:bg-gray-900 shadow-md'
           }`}
         >
           {isConnecting ? (
@@ -249,9 +246,9 @@ Keep responses very brief since this is a voice interface.`,
         </button>
 
         {/* Status */}
-        <p className="text-center text-sm text-gray-600">{status}</p>
+        <p className="text-center text-sm text-gray-500 font-light">{status}</p>
         {transcript && (
-          <p className="text-center text-xs text-gray-500 italic">"{transcript}"</p>
+          <p className="text-center text-xs text-gray-600 font-light">{transcript}</p>
         )}
       </div>
     );
