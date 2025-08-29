@@ -24,7 +24,7 @@ export default function VoiceControl({
   const [isListening, setIsListening] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [status, setStatus] = useState('Click to start speaking');
+  const [status, setStatus] = useState('Click or press spacebar to start');
   const clientRef = useRef<RealtimeClient | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -40,6 +40,26 @@ export default function VoiceControl({
       }
     };
   }, []);
+
+  // Keyboard shortcut for spacebar
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Check if spacebar is pressed and no input/textarea is focused
+      if (e.code === 'Space' && 
+          !(e.target instanceof HTMLInputElement || 
+            e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        if (isListening) {
+          stopListening();
+        } else if (!isConnecting) {
+          startListening();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isListening, isConnecting]);
 
   useEffect(() => {
     if (onListeningChange) {
@@ -193,7 +213,7 @@ Keep responses very brief since this is a voice interface.`,
       cancelAnimationFrame(animationRef.current);
     }
     setIsListening(false);
-    setStatus('Click to start speaking');
+    setStatus('Click or press spacebar to start');
   };
 
   if (ultraCompact) {
