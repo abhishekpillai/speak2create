@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Loader2, Image as ImageIcon, X } from 'lucide-react';
+import { Download, Loader2, Image as ImageIcon, X, Maximize2 } from 'lucide-react';
 
 interface ImageDisplayProps {
   imageUrl: string | null;
   isLoading: boolean;
   onClear: () => void;
+  compact?: boolean;
+  centered?: boolean;
 }
 
-export default function ImageDisplay({ imageUrl, isLoading, onClear }: ImageDisplayProps) {
+export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = false, centered = false }: ImageDisplayProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleDownload = () => {
@@ -54,12 +56,270 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear }: ImageDisp
     }
   };
 
+  if (centered) {
+    // Centered layout - smaller image, stacked controls
+    if (isLoading) {
+      return (
+        <div className="aspect-[4/3] flex items-center justify-center bg-white rounded-xl shadow-lg border border-purple-100">
+          <div className="text-center space-y-3">
+            <div className="relative">
+              <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
+              <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
+            </div>
+            <p className="text-gray-700 font-medium">Creating your vision...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!imageUrl) {
+      return (
+        <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-dashed border-purple-200">
+          <div className="text-center space-y-3">
+            <div className="p-4 bg-white rounded-full shadow-md inline-block">
+              <ImageIcon className="w-12 h-12 text-purple-400" />
+            </div>
+            <p className="text-sm text-gray-500">Your image will appear here</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="space-y-3">
+          <div className="relative group">
+            {/* Main Image */}
+            <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-xl bg-white border border-purple-100">
+              <img
+                src={imageUrl}
+                alt="Generated image"
+                className="w-full h-full object-contain cursor-pointer bg-gray-50"
+                onClick={() => setIsFullscreen(true)}
+              />
+            </div>
+            
+            {/* Overlay Controls */}
+            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => setIsFullscreen(true)}
+                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                title="Fullscreen"
+              >
+                <Maximize2 className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                onClick={handleSave}
+                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                title="Save"
+              >
+                <Download className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                onClick={onClear}
+                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                title="Clear"
+              >
+                <X className="w-4 h-4 text-gray-700" />
+              </button>
+            </div>
+          </div>
+
+          {/* Compact Action Bar */}
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              className="flex-1 py-2 px-3 bg-purple-100 hover:bg-purple-200 rounded-lg text-sm font-medium text-purple-700 transition-all flex items-center justify-center gap-2"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Save
+            </button>
+            <button
+              onClick={onClear}
+              className="flex-1 py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
+            >
+              <X className="w-3.5 h-3.5" />
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Fullscreen Modal */}
+        {isFullscreen && (
+          <div 
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 cursor-pointer backdrop-blur-sm"
+            onClick={() => setIsFullscreen(false)}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFullscreen(false);
+              }}
+              className="absolute top-4 right-4 p-3 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSave();
+              }}
+              className="absolute bottom-4 right-4 p-3 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all flex items-center gap-2"
+            >
+              <Download className="w-5 h-5 text-white" />
+              <span className="text-white">Save</span>
+            </button>
+            
+            <img
+              src={imageUrl}
+              alt="Generated image fullscreen"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
+  if (compact) {
+    // Compact layout for above-the-fold design
+    if (isLoading) {
+      return (
+        <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-lg border border-purple-100">
+          <div className="text-center space-y-3">
+            <div className="relative">
+              <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
+              <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
+            </div>
+            <p className="text-gray-700 font-medium">Creating your vision...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!imageUrl) {
+      return (
+        <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-dashed border-purple-200">
+          <div className="text-center space-y-3">
+            <div className="p-4 bg-white rounded-full shadow-md inline-block">
+              <ImageIcon className="w-12 h-12 text-purple-400" />
+            </div>
+            <p className="text-sm text-gray-500">Your image will appear here</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="h-full flex flex-col">
+          <div className="flex-1 relative group min-h-0">
+            {/* Main Image */}
+            <div className="h-full rounded-xl overflow-hidden shadow-xl bg-white border border-purple-100">
+              <img
+                src={imageUrl}
+                alt="Generated image"
+                className="w-full h-full object-contain cursor-pointer bg-gray-50"
+                onClick={() => setIsFullscreen(true)}
+              />
+            </div>
+            
+            {/* Overlay Controls */}
+            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => setIsFullscreen(true)}
+                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                title="Fullscreen"
+              >
+                <Maximize2 className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                onClick={handleSave}
+                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                title="Save"
+              >
+                <Download className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                onClick={onClear}
+                className="p-2 bg-white/95 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-all hover:scale-110"
+                title="Clear"
+              >
+                <X className="w-4 h-4 text-gray-700" />
+              </button>
+            </div>
+          </div>
+
+          {/* Compact Action Bar */}
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={handleSave}
+              className="flex-1 py-2 px-3 bg-purple-100 hover:bg-purple-200 rounded-lg text-sm font-medium text-purple-700 transition-all flex items-center justify-center gap-2"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Save
+            </button>
+            <button
+              onClick={onClear}
+              className="flex-1 py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
+            >
+              <X className="w-3.5 h-3.5" />
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Fullscreen Modal */}
+        {isFullscreen && (
+          <div 
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 cursor-pointer backdrop-blur-sm"
+            onClick={() => setIsFullscreen(false)}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFullscreen(false);
+              }}
+              className="absolute top-4 right-4 p-3 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSave();
+              }}
+              className="absolute bottom-4 right-4 p-3 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all flex items-center gap-2"
+            >
+              <Download className="w-5 h-5 text-white" />
+              <span className="text-white">Save</span>
+            </button>
+            
+            <img
+              src={imageUrl}
+              alt="Generated image fullscreen"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // Original non-compact layout code remains the same...
   if (isLoading) {
     return (
-      <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
-          <p className="text-gray-600 font-medium">Creating your image...</p>
+      <div className="w-full aspect-[4/3] bg-white rounded-2xl shadow-xl border border-purple-100">
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
+          <div className="relative">
+            <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
+            <div className="absolute inset-0 w-16 h-16 bg-purple-500/20 rounded-full animate-ping" />
+          </div>
+          <p className="text-gray-700 font-medium text-lg">Creating your vision...</p>
           <p className="text-sm text-gray-500">This may take a few seconds</p>
         </div>
       </div>
@@ -68,11 +328,15 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear }: ImageDisp
 
   if (!imageUrl) {
     return (
-      <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
-        <div className="flex flex-col items-center justify-center h-96 border-2 border-dashed border-gray-300 rounded-lg">
-          <ImageIcon className="w-16 h-16 text-gray-400 mb-4" />
-          <p className="text-gray-600 font-medium">No image yet</p>
-          <p className="text-sm text-gray-500 mt-2">Speak a command to generate an image</p>
+      <div className="w-full aspect-[4/3] bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-xl border-2 border-dashed border-purple-200">
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
+          <div className="p-6 bg-white rounded-full shadow-lg">
+            <ImageIcon className="w-20 h-20 text-purple-400" />
+          </div>
+          <div className="text-center">
+            <p className="text-gray-700 font-medium text-lg">No image yet</p>
+            <p className="text-sm text-gray-500 mt-2">Click "Start Speaking" and describe what you want to create</p>
+          </div>
         </div>
       </div>
     );
@@ -80,67 +344,77 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear }: ImageDisp
 
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
-        <div className="space-y-4">
-          {/* Image Container */}
-          <div className="relative group">
+      <div className="w-full">
+        <div className="relative group">
+          {/* Main Image */}
+          <div className="rounded-2xl overflow-hidden shadow-2xl bg-white border border-purple-100">
             <img
               src={imageUrl}
               alt="Generated image"
-              className="w-full rounded-lg shadow-md cursor-pointer transition-transform hover:scale-[1.02]"
+              className="w-full h-auto cursor-pointer transition-transform hover:scale-[1.01]"
               onClick={() => setIsFullscreen(true)}
             />
-            
-            {/* Overlay Controls */}
-            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={handleSave}
-                className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-colors"
-                title="Save image"
-              >
-                <Download className="w-5 h-5 text-gray-700" />
-              </button>
-              <button
-                onClick={onClear}
-                className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-lg hover:bg-white transition-colors"
-                title="Clear image"
-              >
-                <X className="w-5 h-5 text-gray-700" />
-              </button>
-            </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
+          
+          {/* Overlay Controls - Top Right */}
+          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => setIsFullscreen(true)}
+              className="p-2.5 bg-white/95 backdrop-blur rounded-xl shadow-lg hover:bg-white transition-all hover:scale-110"
+              title="Fullscreen"
+            >
+              <Maximize2 className="w-5 h-5 text-gray-700" />
+            </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors flex items-center justify-center gap-2"
+              className="p-2.5 bg-white/95 backdrop-blur rounded-xl shadow-lg hover:bg-white transition-all hover:scale-110"
+              title="Save image"
             >
-              <Download className="w-4 h-4" />
-              Save Image
+              <Download className="w-5 h-5 text-gray-700" />
             </button>
             <button
               onClick={onClear}
-              className="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors flex items-center justify-center gap-2"
+              className="p-2.5 bg-white/95 backdrop-blur rounded-xl shadow-lg hover:bg-white transition-all hover:scale-110"
+              title="Clear image"
             >
-              <X className="w-4 h-4" />
-              Clear
+              <X className="w-5 h-5 text-gray-700" />
             </button>
           </div>
 
-          {/* Edit Hint */}
-          <div className="p-3 bg-green-50 rounded-lg">
-            <p className="text-sm text-green-700">
-              Image created! You can now speak to edit it, or clear to start over.
-            </p>
-          </div>
+          {/* Hover Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-2xl" />
+        </div>
+
+        {/* Action Buttons Below Image */}
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={handleSave}
+            className="flex-1 py-2.5 px-4 bg-purple-100 hover:bg-purple-200 rounded-xl font-medium text-purple-700 transition-all flex items-center justify-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Save Image
+          </button>
+          <button
+            onClick={onClear}
+            className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium text-gray-700 transition-all flex items-center justify-center gap-2"
+          >
+            <X className="w-4 h-4" />
+            Clear & Start Over
+          </button>
+        </div>
+
+        {/* Success Message */}
+        <div className="mt-4 p-3 bg-green-50 rounded-xl border border-green-200">
+          <p className="text-sm text-green-700 text-center">
+            ✨ Image ready! You can edit it by speaking or save your creation.
+          </p>
         </div>
       </div>
 
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-8 cursor-pointer"
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 cursor-pointer backdrop-blur-sm"
           onClick={() => setIsFullscreen(false)}
         >
           <button
@@ -148,14 +422,26 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear }: ImageDisp
               e.stopPropagation();
               setIsFullscreen(false);
             }}
-            className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur rounded-lg hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 p-3 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all"
           >
             <X className="w-6 h-6 text-white" />
           </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSave();
+            }}
+            className="absolute bottom-4 right-4 p-3 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all flex items-center gap-2"
+          >
+            <Download className="w-5 h-5 text-white" />
+            <span className="text-white">Save</span>
+          </button>
+          
           <img
             src={imageUrl}
             alt="Generated image fullscreen"
-            className="max-w-full max-h-full object-contain"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

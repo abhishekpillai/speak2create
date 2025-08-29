@@ -8,12 +8,18 @@ interface VoiceControlProps {
   onImageGenerate: (prompt: string) => Promise<void>;
   onImageEdit: (instruction: string) => Promise<void>;
   currentImage: string | null;
+  onListeningChange?: (isListening: boolean) => void;
+  compact?: boolean;
+  ultraCompact?: boolean;
 }
 
 export default function VoiceControl({ 
   onImageGenerate, 
   onImageEdit, 
-  currentImage 
+  currentImage,
+  onListeningChange,
+  compact = false,
+  ultraCompact = false
 }: VoiceControlProps) {
   const [isListening, setIsListening] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -34,6 +40,12 @@ export default function VoiceControl({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (onListeningChange) {
+      onListeningChange(isListening);
+    }
+  }, [isListening, onListeningChange]);
 
   const visualizeAudio = (stream: MediaStream) => {
     const audioContext = new AudioContext();
@@ -67,8 +79,8 @@ export default function VoiceControl({
         barHeight = (dataArray[i] / 255) * canvas.height;
         
         const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
-        gradient.addColorStop(0, 'rgb(99, 102, 241)');
-        gradient.addColorStop(1, 'rgb(139, 92, 246)');
+        gradient.addColorStop(0, 'rgb(147, 51, 234)');
+        gradient.addColorStop(1, 'rgb(99, 102, 241)');
         
         ctx.fillStyle = gradient;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
@@ -187,6 +199,141 @@ Keep responses very brief since this is a voice interface.`,
     setStatus('Click to start speaking');
   };
 
+  if (ultraCompact) {
+    // Ultra compact - just visualization and button stacked
+    return (
+      <div className="w-full space-y-3">
+        {/* Audio Visualizer - Slim Bar */}
+        <div className="relative h-16 bg-gray-900/5 rounded-xl overflow-hidden border border-purple-100">
+          <canvas
+            ref={canvasRef}
+            width={640}
+            height={64}
+            className="w-full h-full"
+          />
+          {!isListening && !isConnecting && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-gray-400 text-xs">Audio visualization will appear here</p>
+            </div>
+          )}
+        </div>
+
+        {/* Control Button */}
+        <button
+          onClick={isListening ? stopListening : startListening}
+          disabled={isConnecting}
+          className={`w-full py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-[1.02] flex items-center justify-center gap-3 ${
+            isListening
+              ? 'bg-red-500 hover:bg-red-600 text-white'
+              : isConnecting
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg'
+          }`}
+        >
+          {isConnecting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Connecting...
+            </>
+          ) : isListening ? (
+            <>
+              <MicOff className="w-5 h-5" />
+              Stop Speaking
+            </>
+          ) : (
+            <>
+              <Mic className="w-5 h-5" />
+              Start Speaking
+            </>
+          )}
+        </button>
+
+        {/* Status */}
+        <p className="text-center text-sm text-gray-600">{status}</p>
+        {transcript && (
+          <p className="text-center text-xs text-gray-500 italic">"{transcript}"</p>
+        )}
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <div className="w-full">
+        {/* Audio Visualizer - Slim Bar */}
+        <div className="relative h-20 bg-gray-900/5 rounded-xl overflow-hidden mb-4 border border-purple-100">
+          <canvas
+            ref={canvasRef}
+            width={640}
+            height={80}
+            className="w-full h-full"
+          />
+          {!isListening && !isConnecting && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-gray-500 text-sm">Audio visualization will appear here</p>
+            </div>
+          )}
+        </div>
+
+        {/* Control Button and Status */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={isListening ? stopListening : startListening}
+            disabled={isConnecting}
+            className={`py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${
+              isListening
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : isConnecting
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
+            }`}
+          >
+            {isConnecting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Connecting...
+              </>
+            ) : isListening ? (
+              <>
+                <MicOff className="w-5 h-5" />
+                Stop Speaking
+              </>
+            ) : (
+              <>
+                <Mic className="w-5 h-5" />
+                Start Speaking
+              </>
+            )}
+          </button>
+
+          <div className="flex-1">
+            <p className="text-sm text-gray-600">{status}</p>
+            {transcript && (
+              <p className="text-sm text-gray-700 italic mt-1">"{transcript}"</p>
+            )}
+          </div>
+        </div>
+
+        {/* Command Suggestions */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="text-xs text-gray-500">Try saying:</span>
+          <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+            "Generate a sunset over mountains"
+          </button>
+          <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+            "Create a cute robot"
+          </button>
+          {currentImage && (
+            <button className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200 transition-colors">
+              "Make it more colorful"
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Original full-size layout
   return (
     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
       <div className="space-y-4">
@@ -214,7 +361,7 @@ Keep responses very brief since this is a voice interface.`,
               ? 'bg-red-500 hover:bg-red-600 text-white'
               : isConnecting
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white'
+              : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
           }`}
         >
           {isConnecting ? (
@@ -246,9 +393,9 @@ Keep responses very brief since this is a voice interface.`,
         </div>
 
         {/* Tips */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm font-semibold text-blue-900 mb-2">Try saying:</p>
-          <ul className="text-sm text-blue-700 space-y-1">
+        <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+          <p className="text-sm font-semibold text-purple-900 mb-2">Try saying:</p>
+          <ul className="text-sm text-purple-700 space-y-1">
             <li>• "Generate a sunset over mountains"</li>
             <li>• "Create a cute robot in a garden"</li>
             {currentImage && (

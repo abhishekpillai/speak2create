@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import VoiceControl from '@/components/VoiceControl';
 import ImageDisplay from '@/components/ImageDisplay';
-import { Sparkles, Wand2 } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [sessionId] = useState(`session_${Date.now()}`);
 
   const handleImageGenerate = async (prompt: string) => {
@@ -70,114 +71,112 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  speak2create
-                </h1>
-                <p className="text-sm text-gray-600">Voice-powered image generation</p>
-              </div>
+    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-indigo-50 overflow-hidden">
+      {/* Compact Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-purple-100 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Wand2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Powered by AI</span>
-            </div>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              speak2create
+            </h1>
           </div>
+          <p className="text-xs text-gray-600 hidden sm:block">Voice-powered image generation</p>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Column - Voice Control */}
-          <div className="space-y-6">
-            <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                Speak Your Vision
-              </h2>
-              <p className="text-gray-600">
-                Just describe what you want to see, and watch it come to life
-              </p>
+      {/* Main Content - Centered Stack */}
+      <main className="flex-1 flex items-center justify-center p-4 min-h-0">
+        <div className="w-full max-w-6xl flex gap-8 items-center">
+          {/* Left Side - Try Saying Tips */}
+          <div className="hidden lg:block w-48 flex-shrink-0">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Try saying:</p>
+              <div className="space-y-2">
+                <div className="text-sm text-purple-600 bg-purple-50 rounded-lg p-2">
+                  "Generate a sunset over mountains"
+                </div>
+                <div className="text-sm text-purple-600 bg-purple-50 rounded-lg p-2">
+                  "Create a cute robot in a garden"
+                </div>
+                {currentImage && (
+                  <div className="text-sm text-indigo-600 bg-indigo-50 rounded-lg p-2">
+                    "Make the sky more vibrant"
+                  </div>
+                )}
+              </div>
             </div>
-            
-            <VoiceControl
-              onImageGenerate={handleImageGenerate}
-              onImageEdit={handleImageEdit}
-              currentImage={currentImage}
-            />
           </div>
 
-          {/* Right Column - Image Display */}
-          <div className="space-y-6">
-            <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                Your Creation
+          {/* Center - Main Content */}
+          <div className="flex-1 flex flex-col items-center max-w-3xl mx-auto">
+            {/* Title */}
+            <div className="text-center mb-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                {currentImage ? 'Your Creation' : 'Speak Your Vision'}
               </h2>
-              <p className="text-gray-600">
-                {currentImage ? 'Edit with voice or save your masterpiece' : 'Your image will appear here'}
+              <p className="text-sm text-gray-600">
+                {currentImage ? 'Edit with voice or save your masterpiece' : 'Just describe what you want to see'}
               </p>
             </div>
-            
-            <ImageDisplay
-              imageUrl={currentImage}
-              isLoading={isLoading}
-              onClear={handleClear}
-            />
-          </div>
-        </div>
 
-        {/* Features Section */}
-        <div className="mt-16 grid md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-              <Sparkles className="w-6 h-6 text-indigo-600" />
+            {/* Image Display - Smaller, Centered */}
+            <div className="w-full max-w-xl mb-6">
+              <ImageDisplay
+                imageUrl={currentImage}
+                isLoading={isLoading}
+                onClear={handleClear}
+                centered={true}
+              />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Natural Voice Commands</h3>
-            <p className="text-sm text-gray-600">
-              Simply speak what you imagine, no typing or complex tools needed
-            </p>
+
+            {/* Voice Control - Compact, Centered */}
+            <div className="w-full max-w-md">
+              <VoiceControl
+                onImageGenerate={handleImageGenerate}
+                onImageEdit={handleImageEdit}
+                currentImage={currentImage}
+                onListeningChange={setIsListening}
+                ultraCompact={true}
+              />
+            </div>
+
+            {/* Mobile Tips - Show below on small screens */}
+            <div className="lg:hidden mt-6 flex flex-wrap justify-center gap-2">
+              <span className="text-xs text-gray-500">Try:</span>
+              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                "Generate a sunset"
+              </span>
+              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                "Create a robot"
+              </span>
+            </div>
           </div>
-          
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <Wand2 className="w-6 h-6 text-purple-600" />
+
+          {/* Right Side - Additional Tips */}
+          <div className="hidden lg:block w-48 flex-shrink-0">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick tips:</p>
+              <div className="space-y-2 text-xs text-gray-600">
+                <div className="flex items-start gap-2">
+                  <span className="text-purple-500">•</span>
+                  <span>Be descriptive for better results</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-purple-500">•</span>
+                  <span>You can edit any generated image</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-purple-500">•</span>
+                  <span>Click image to view fullscreen</span>
+                </div>
+              </div>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Iterative Editing</h3>
-            <p className="text-sm text-gray-600">
-              Refine your creations with follow-up voice commands
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Instant Results</h3>
-            <p className="text-sm text-gray-600">
-              Watch your ideas transform into images in seconds
-            </p>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="mt-16 border-t border-gray-200 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-center text-sm text-gray-500">
-            speak2create - Transform voice into visual reality
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
