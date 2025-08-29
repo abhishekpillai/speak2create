@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import VoiceControl from "@/components/VoiceControl";
 import ImageDisplay from "@/components/ImageDisplay";
 import { Sparkles } from "lucide-react";
@@ -37,10 +37,15 @@ export default function Home() {
     }
   };
 
-  const handleImageEdit = async (instruction: string) => {
-    if (!currentImage) return;
+  const handleImageEdit = useCallback(async (instruction: string) => {
+    console.log('📝 handleImageEdit called with:', { instruction, hasImage: !!currentImage });
+    if (!currentImage) {
+      console.warn('⚠️ handleImageEdit called but no current image');
+      return;
+    }
 
     try {
+      console.log('🔄 Starting image edit, setting loading to true');
       setIsLoading(true);
 
       const response = await fetch("/api/edit", {
@@ -58,13 +63,15 @@ export default function Home() {
       }
 
       const data = await response.json();
+      console.log('✅ Edit successful, updating image');
       setCurrentImage(data.imageUrl);
     } catch (error) {
-      console.error("Image editing error:", error);
+      console.error('❌ Image editing error:', error);
     } finally {
+      console.log('🔄 Edit complete, setting loading to false');
       setIsLoading(false);
     }
-  };
+  }, [currentImage, sessionId]);
 
   const handleClear = () => {
     setCurrentImage(null);

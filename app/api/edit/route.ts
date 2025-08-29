@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GeminiClient } from '@/lib/gemini';
 
 export async function POST(request: NextRequest) {
+  console.log('🚀 Edit API route called');
   try {
     const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
     
@@ -13,6 +14,12 @@ export async function POST(request: NextRequest) {
     }
 
     const { image_id, image_data, edit_instruction, session_id } = await request.json();
+    console.log('📝 Edit request data:', { 
+      has_image_data: !!image_data, 
+      image_data_length: image_data?.length,
+      edit_instruction, 
+      session_id 
+    });
 
     if (!image_data || !edit_instruction) {
       return NextResponse.json(
@@ -21,6 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('🤖 Calling Gemini client editImage...');
     const client = new GeminiClient(apiKey);
     const result = await client.editImage({
       imageId: image_id,
@@ -29,9 +37,10 @@ export async function POST(request: NextRequest) {
       sessionId: session_id
     });
 
+    console.log('✅ Edit successful, returning result');
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Image editing error:', error);
+    console.error('❌ Image editing API error:', error);
     return NextResponse.json(
       { error: 'Failed to edit image' },
       { status: 500 }
