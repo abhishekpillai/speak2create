@@ -88,7 +88,7 @@ export default function VoiceControl({
       animationRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const barWidth = (canvas.width / bufferLength) * 2.5;
@@ -98,8 +98,11 @@ export default function VoiceControl({
       for (let i = 0; i < bufferLength; i++) {
         barHeight = (dataArray[i] / 255) * canvas.height;
         
-        // Modern minimal visualization
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'; // Nearly black with slight transparency
+        // Emerald green gradient for visualization
+        const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+        gradient.addColorStop(0, '#10b981'); // emerald-500
+        gradient.addColorStop(1, '#059669'); // emerald-600
+        ctx.fillStyle = gradient;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth + 1;
       }
