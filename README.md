@@ -56,7 +56,7 @@ npm run dev
 
 ## Usage
 
-1. Click "Start Speaking" to begin
+1. Click "Start Creating" to begin
 2. Describe the image you want to create
 3. Watch as your voice transforms into an image
 4. Continue speaking to edit and refine your creation
