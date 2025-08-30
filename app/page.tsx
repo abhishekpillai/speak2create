@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import VoiceControl from "@/components/VoiceControl";
 import ImageDisplay from "@/components/ImageDisplay";
+import UsageLimits from "@/components/UsageLimits";
 import { Sparkles } from "lucide-react";
 
 export default function Home() {
@@ -10,10 +11,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [sessionId] = useState(`session_${Date.now()}`);
+  const [rateLimitInfo, setRateLimitInfo] = useState<any>(null);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
   const handleImageGenerate = async (prompt: string) => {
     try {
       setIsLoading(true);
+      setRateLimitError(null);
 
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -24,14 +28,23 @@ export default function Home() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to generate image");
+        if (response.status === 429) {
+          setRateLimitError(data.message || "Rate limit exceeded");
+          setRateLimitInfo(data.rateLimitInfo || data.sessionInfo);
+        } else {
+          throw new Error(data.error || "Failed to generate image");
+        }
+        return;
       }
 
-      const data = await response.json();
       setCurrentImage(data.imageUrl);
+      setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
       console.error("Image generation error:", error);
+      setRateLimitError("Failed to generate image. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -47,6 +60,7 @@ export default function Home() {
     try {
       console.log('🔄 Starting image edit, setting loading to true');
       setIsLoading(true);
+      setRateLimitError(null);
 
       const response = await fetch("/api/edit", {
         method: "POST",
@@ -58,15 +72,24 @@ export default function Home() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to edit image");
+        if (response.status === 429) {
+          setRateLimitError(data.message || "Rate limit exceeded");
+          setRateLimitInfo(data.rateLimitInfo || data.sessionInfo);
+        } else {
+          throw new Error(data.error || "Failed to edit image");
+        }
+        return;
       }
 
-      const data = await response.json();
       console.log('✅ Edit successful, updating image');
       setCurrentImage(data.imageUrl);
+      setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
       console.error('❌ Image editing error:', error);
+      setRateLimitError("Failed to edit image. Please try again.");
     } finally {
       console.log('🔄 Edit complete, setting loading to false');
       setIsLoading(false);
@@ -154,41 +177,43 @@ export default function Home() {
                 onListeningChange={setIsListening}
                 ultraCompact={true}
               />
+              
+              {/* Rate Limit Error */}
+              {rateLimitError && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700 font-medium">
+                    {rateLimitError}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Mobile Tips - Show below on small screens */}
-            <div className="lg:hidden mt-6 flex flex-wrap justify-center gap-2">
-              <span className="text-xs text-gray-500">Try:</span>
-              <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
-                "Generate a sunset"
-              </span>
-              <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
-                "Create a robot"
-              </span>
+            {/* Mobile Usage Limits & Tips */}
+            <div className="lg:hidden mt-6 space-y-4">
+              <UsageLimits 
+                sessionId={sessionId}
+                rateLimitInfo={rateLimitInfo}
+                compact={true}
+              />
+              <div className="flex flex-wrap justify-center gap-2">
+                <span className="text-xs text-gray-500">Try:</span>
+                <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                  "Generate a sunset"
+                </span>
+                <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                  "Create a robot"
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Right Side - Additional Tips */}
-          <div className="hidden lg:block w-48 flex-shrink-0">
-            <div className="space-y-3">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
-                Quick tips
-              </p>
-              <div className="space-y-2 text-xs text-gray-600">
-                <div className="flex items-start gap-2">
-                  <span className="text-gray-400">→</span>
-                  <span>Be descriptive for better results</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-gray-400">→</span>
-                  <span>You can edit any generated image</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-gray-400">→</span>
-                  <span>Click image to view fullscreen</span>
-                </div>
-              </div>
-            </div>
+          {/* Right Side - Usage Limits */}
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <UsageLimits 
+              sessionId={sessionId}
+              rateLimitInfo={rateLimitInfo}
+              compact={true}
+            />
           </div>
         </div>
       </main>
