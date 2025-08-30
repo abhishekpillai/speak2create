@@ -60,6 +60,31 @@ export async function checkIPRateLimit(ip: string): Promise<RateLimitResult> {
   }
 }
 
+// Get rate limit info WITHOUT consuming a token
+export async function getIPRateLimitInfo(ip: string): Promise<RateLimitResult> {
+  try {
+    // Use getRemaining to check without consuming
+    const { remaining, reset } = await ipGenerationLimiter.getRemaining(ip);
+    
+    return {
+      success: remaining > 0,
+      limit: RATE_LIMITS.IP_GENERATIONS_PER_HOUR,
+      remaining,
+      reset: new Date(reset),
+      error: remaining > 0 ? undefined : 'IP rate limit exceeded'
+    };
+  } catch (error) {
+    console.error('Rate limit info failed:', error);
+    // Fail open for availability
+    return {
+      success: true,
+      limit: RATE_LIMITS.IP_GENERATIONS_PER_HOUR,
+      remaining: RATE_LIMITS.IP_GENERATIONS_PER_HOUR,
+      reset: new Date(Date.now() + RATE_LIMITS.IP_WINDOW_MINUTES * 60 * 1000),
+    };
+  }
+}
+
 export async function checkAPIRateLimit(ip: string): Promise<RateLimitResult> {
   try {
     const { success, limit, remaining, reset } = await apiRequestLimiter.limit(ip);
@@ -73,6 +98,30 @@ export async function checkAPIRateLimit(ip: string): Promise<RateLimitResult> {
     };
   } catch (error) {
     console.error('API rate limit check failed:', error);
+    // Fail open for availability
+    return {
+      success: true,
+      limit: RATE_LIMITS.API_REQUESTS_PER_MINUTE,
+      remaining: RATE_LIMITS.API_REQUESTS_PER_MINUTE,
+      reset: new Date(Date.now() + 60 * 1000),
+    };
+  }
+}
+
+// Get API rate limit info WITHOUT consuming a token  
+export async function getAPIRateLimitInfo(ip: string): Promise<RateLimitResult> {
+  try {
+    const { remaining, reset } = await apiRequestLimiter.getRemaining(ip);
+    
+    return {
+      success: remaining > 0,
+      limit: RATE_LIMITS.API_REQUESTS_PER_MINUTE,
+      remaining,
+      reset: new Date(reset),
+      error: remaining > 0 ? undefined : 'API rate limit exceeded'
+    };
+  } catch (error) {
+    console.error('API rate limit info failed:', error);
     // Fail open for availability
     return {
       success: true,
@@ -133,7 +182,7 @@ export async function incrementSessionUsage(sessionId: string): Promise<void> {
 
 export async function getUsageInfo(ip: string, sessionId: string): Promise<UsageInfo> {
   const [ipLimit, sessionLimit] = await Promise.all([
-    checkIPRateLimit(ip),
+    getIPRateLimitInfo(ip),  // Use the non-consuming version
     checkSessionLimit(sessionId),
   ]);
   
