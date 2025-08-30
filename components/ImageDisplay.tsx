@@ -335,7 +335,7 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
           </div>
           <div className="text-center">
             <p className="text-gray-700 font-medium text-lg">No image yet</p>
-            <p className="text-sm text-gray-500 mt-2">Click "Start Speaking" and describe what you want to create</p>
+            <p className="text-sm text-gray-500 mt-2">Click "Start Creating" and describe what you want to create</p>
           </div>
         </div>
       </div>
