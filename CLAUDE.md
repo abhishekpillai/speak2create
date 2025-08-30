@@ -69,10 +69,15 @@ This codebase has complex nested callback patterns that require careful state ma
 
 ## Environment Variables
 
-Required API keys in `.env.local`:
+Required configuration in `.env.local`:
 ```bash
+# AI API Keys
 OPENAI_API_KEY=your_openai_api_key_here
 GOOGLE_GEMINI_API_KEY=your_gemini_api_key_here
+
+# Upstash Redis Configuration (Required for rate limiting)
+KV_REST_API_URL=your_upstash_url_here
+KV_REST_API_TOKEN=your_upstash_token_here
 ```
 
 ## Common Issues & Solutions
@@ -98,17 +103,24 @@ app/
 ├── api/
 │   ├── session/     # OpenAI ephemeral token creation
 │   ├── generate/    # New image generation via Gemini
-│   └── edit/        # Image modification via Gemini
+│   ├── edit/        # Image modification via Gemini
+│   └── usage/       # Rate limit usage information
+├── layout.tsx       # Root layout with Analytics integration
 ├── page.tsx         # Main app with voice/image state management
 └── globals.css      # Tailwind v4 imports + custom animations
 
 components/
 ├── VoiceControl.tsx # WebRTC voice streaming + audio visualization
-└── ImageDisplay.tsx # Image viewer + fullscreen modal + save/download
+├── ImageDisplay.tsx # Image viewer + fullscreen modal + save/download
+└── UsageLimits.tsx  # Rate limit display (shown when limits reached)
 
 lib/
 ├── openai-realtime.ts # Custom WebRTC client for OpenAI streaming
-└── gemini.ts          # Google Gemini API wrapper with prompt enhancement
+├── gemini.ts          # Google Gemini API wrapper with prompt enhancement
+├── rate-limit.ts      # Rate limiting logic with Upstash Redis
+└── constants.ts       # Rate limits and configuration constants
+
+middleware.ts          # Edge middleware for rate limiting and geo-filtering
 ```
 
 ## State Management Patterns
@@ -126,4 +138,39 @@ Current per-session costs (~$1.62 for 5 minutes):
 - Voice output: ~$1.20  
 - Image generation: ~$0.12 (3 images)
 
-For production deployment, implement rate limiting and session caps to control costs.
+**Cost Protection Implemented:**
+- Rate limiting prevents runaway usage (10 generations/hour per IP, 5 per session)
+- Geographic filtering blocks abuse-prone regions
+- Session-based caps limit individual user consumption
+- Fail-safe middleware ensures availability while controlling costs
+
+## Rate Limiting & Security
+
+**Rate Limiting Implementation:**
+- IP-based: 10 generations per hour per IP address
+- Session-based: 5 images per 20-minute session
+- API requests: 20 per minute per IP
+- Uses Upstash Redis for distributed rate limiting
+
+**Geographic Filtering:**
+- 33 allowed countries including US, Canada, EU, UK, Japan, Singapore, Korea, and major Latin American markets
+- Blocks regions commonly associated with abuse/bot traffic
+- Returns 403 with user-friendly message for blocked regions
+
+**Middleware Protection:**
+- `middleware.ts` handles both rate limiting and geographic filtering
+- Runs at edge before reaching API routes
+- Fail-open strategy maintains availability if rate limiting fails
+
+**Configuration Files:**
+- `lib/rate-limit.ts`: Core rate limiting logic with Upstash integration
+- `lib/constants.ts`: Rate limit values and error messages
+- `components/UsageLimits.tsx`: User-facing usage display (only shows when limits reached)
+
+## Analytics
+
+**Vercel Analytics Integration:**
+- Automatic page view tracking and Core Web Vitals monitoring
+- User analytics (geographic, device, browser data)
+- Performance insights available in Vercel Dashboard post-deployment
+- Zero-configuration setup with `@vercel/analytics/next`
