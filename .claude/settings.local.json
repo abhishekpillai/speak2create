@@ -4,7 +4,9 @@
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue:*)"
     ],
     "deny": [],
     "ask": []
