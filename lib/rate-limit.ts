@@ -128,15 +128,31 @@ export async function incrementSessionUsage(sessionId: string): Promise<void> {
   }
 }
 
+export async function getIPUsage(ip: string): Promise<{ remaining: number; resetTime: Date }> {
+  try {
+    const { remaining, reset } = await ipGenerationLimiter.getRemaining(ip);
+    return {
+      remaining,
+      resetTime: new Date(reset),
+    };
+  } catch (error) {
+    console.error('Failed to get IP usage:', error);
+    return {
+      remaining: RATE_LIMITS.IP_GENERATIONS_PER_HOUR,
+      resetTime: new Date(Date.now() + RATE_LIMITS.IP_WINDOW_MINUTES * 60 * 1000),
+    };
+  }
+}
+
 export async function getUsageInfo(ip: string, sessionId: string): Promise<UsageInfo> {
-  const [ipLimit, sessionLimit] = await Promise.all([
-    checkIPRateLimit(ip),
+  const [ipUsage, sessionLimit] = await Promise.all([
+    getIPUsage(ip),
     checkSessionLimit(sessionId),
   ]);
-  
+
   return {
-    remainingGenerations: ipLimit.remaining,
-    resetTime: ipLimit.reset,
+    remainingGenerations: ipUsage.remaining,
+    resetTime: ipUsage.resetTime,
     sessionImagesUsed: sessionLimit.imagesUsed,
     sessionImagesRemaining: sessionLimit.imagesRemaining,
     sessionResetTime: sessionLimit.resetTime,
