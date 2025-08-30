@@ -30,6 +30,8 @@ export class RealtimeClient {
   private pc: RTCPeerConnection | null = null;
   private dc: RTCDataChannel | null = null;
   private audioElement: HTMLAudioElement | null = null;
+  private localStream: MediaStream | null = null;
+  private onAudioTrack?: (stream: MediaStream) => void;
   private onMessage?: (event: any) => void;
   private onFunctionCall?: (name: string, args: any) => Promise<any>;
 
@@ -55,11 +57,15 @@ export class RealtimeClient {
     this.pc.ontrack = (e) => {
       if (this.audioElement && e.streams[0]) {
         this.audioElement.srcObject = e.streams[0];
+        if (this.onAudioTrack) {
+          this.onAudioTrack(e.streams[0]);
+        }
       }
     };
 
     // Add local audio track
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    this.localStream = stream;
     stream.getTracks().forEach(track => {
       this.pc?.addTrack(track, stream);
     });
@@ -189,6 +195,18 @@ export class RealtimeClient {
     this.onFunctionCall = handler;
   }
 
+  mute() {
+    this.localStream?.getAudioTracks().forEach(track => (track.enabled = false));
+  }
+
+  unmute() {
+    this.localStream?.getAudioTracks().forEach(track => (track.enabled = true));
+  }
+
+  setOnAudioTrack(handler: (stream: MediaStream) => void) {
+    this.onAudioTrack = handler;
+  }
+
   disconnect() {
     if (this.audioElement) {
       this.audioElement.srcObject = null;
@@ -198,6 +216,10 @@ export class RealtimeClient {
     }
     if (this.pc) {
       this.pc.close();
+    }
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => track.stop());
+      this.localStream = null;
     }
     this.session = null;
   }

@@ -24,11 +24,16 @@ export default function VoiceControl({
   const [isListening, setIsListening] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [status, setStatus] = useState('Click or press spacebar to start');
+  const [status, setStatus] = useState('Click or press spacebar to start creating');
+  const [sessionActive, setSessionActive] = useState(false);
   const clientRef = useRef<RealtimeClient | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const aiCanvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const aiAnimationRef = useRef<number | undefined>(undefined);
+  const aiAnalyserRef = useRef<AnalyserNode | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     return () => {
@@ -38,6 +43,10 @@ export default function VoiceControl({
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (aiAnimationRef.current) {
+        cancelAnimationFrame(aiAnimationRef.current);
+      }
+      localStreamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, []);
 
@@ -45,21 +54,25 @@ export default function VoiceControl({
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Check if spacebar is pressed and no input/textarea is focused
-      if (e.code === 'Space' && 
-          !(e.target instanceof HTMLInputElement || 
+      if (e.code === 'Space' &&
+          !(e.target instanceof HTMLInputElement ||
             e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault();
-        if (isListening) {
-          stopListening();
+        if (sessionActive) {
+          if (isListening) {
+            mute();
+          } else {
+            unmute();
+          }
         } else if (!isConnecting) {
-          startListening();
+          startSession();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isListening, isConnecting]);
+  }, [isListening, isConnecting, sessionActive]);
 
   // Add a ref to track current image state for the realtime client
   const currentImageRef = useRef(currentImage);
@@ -84,7 +97,7 @@ export default function VoiceControl({
     }
   }, [isListening, onListeningChange]);
 
-  const visualizeAudio = (stream: MediaStream) => {
+  const visualizeUserAudio = (stream: MediaStream) => {
     const audioContext = new AudioContext();
     const analyser = audioContext.createAnalyser();
     const source = audioContext.createMediaStreamSource(stream);
@@ -105,8 +118,7 @@ export default function VoiceControl({
       animationRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const barWidth = (canvas.width / bufferLength) * 2.5;
       let barHeight;
@@ -114,7 +126,7 @@ export default function VoiceControl({
 
       for (let i = 0; i < bufferLength; i++) {
         barHeight = (dataArray[i] / 255) * canvas.height;
-        
+
         // Emerald green gradient for visualization
         const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
         gradient.addColorStop(0, '#10b981'); // emerald-500
@@ -128,8 +140,51 @@ export default function VoiceControl({
     draw();
   };
 
-  const startListening = useCallback(async () => {
-    console.log('🔄 startListening recreated with currentImage:', !!currentImage);
+  const visualizeAIAudio = (stream: MediaStream) => {
+    const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+    analyser.fftSize = 256;
+    aiAnalyserRef.current = analyser;
+
+    const canvas = aiCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      aiAnimationRef.current = requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 255) * canvas.height;
+
+        // Indigo gradient for AI visualization
+        const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+        gradient.addColorStop(0, '#6366f1'); // indigo-500
+        gradient.addColorStop(1, '#4f46e5'); // indigo-600
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+      }
+    };
+
+    draw();
+  };
+
+  const startSession = useCallback(async () => {
+    console.log('🔄 startSession recreated with currentImage:', !!currentImage);
     try {
       setIsConnecting(true);
       setStatus('Connecting...');
@@ -232,16 +287,25 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
         return { success: false, error: 'Function not available' };
       });
 
+      client.setOnAudioTrack((stream) => {
+        visualizeAIAudio(stream);
+      });
+
       await client.connect(token);
       clientRef.current = client;
 
       // Set up audio visualization
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      visualizeAudio(stream);
+      localStreamRef.current = stream;
+      visualizeUserAudio(stream);
 
+      setSessionActive(true);
       setIsListening(true);
       setIsConnecting(false);
       setStatus('Listening... Speak your command');
+
+      // Greet the user
+      client.sendText('Please welcome the user and ask them what they would like to create.');
     } catch (error) {
       console.error('Failed to start listening:', error);
       setStatus('Failed to connect. Please try again.');
@@ -249,16 +313,18 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
     }
   }, [onImageEdit, onImageGenerate, currentImage]);
 
-  const stopListening = () => {
-    if (clientRef.current) {
-      clientRef.current.disconnect();
-      clientRef.current = null;
-    }
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
+  const mute = () => {
+    localStreamRef.current?.getAudioTracks().forEach(track => (track.enabled = false));
+    clientRef.current?.mute();
     setIsListening(false);
-    setStatus('Click or press spacebar to start');
+    setStatus('Muted');
+  };
+
+  const unmute = () => {
+    localStreamRef.current?.getAudioTracks().forEach(track => (track.enabled = true));
+    clientRef.current?.unmute();
+    setIsListening(true);
+    setStatus('Listening... Speak your command');
   };
 
   if (ultraCompact) {
@@ -271,9 +337,15 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
             ref={canvasRef}
             width={640}
             height={64}
-            className="w-full h-full"
+            className="absolute inset-0 w-full h-full"
           />
-          {!isListening && !isConnecting && (
+          <canvas
+            ref={aiCanvasRef}
+            width={640}
+            height={64}
+            className="absolute inset-0 w-full h-full"
+          />
+          {!sessionActive && !isConnecting && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-gray-400 text-xs font-light">Audio visualization</p>
             </div>
@@ -282,11 +354,13 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
 
         {/* Control Button */}
         <button
-          onClick={isListening ? stopListening : startListening}
+          onClick={sessionActive ? (isListening ? mute : unmute) : startSession}
           disabled={isConnecting}
           className={`w-full py-3.5 px-6 rounded-xl font-medium transition-all flex items-center justify-center gap-3 ${
-            isListening
-              ? 'bg-black text-white hover:bg-gray-900'
+            sessionActive
+              ? isListening
+                ? 'bg-black text-white hover:bg-gray-900'
+                : 'bg-black text-white hover:bg-gray-900'
               : isConnecting
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-black text-white hover:bg-gray-900 shadow-md'
@@ -297,15 +371,20 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
               <Loader2 className="w-5 h-5 animate-spin" />
               Connecting...
             </>
+          ) : !sessionActive ? (
+            <>
+              <Mic className="w-5 h-5" />
+              Start Creating
+            </>
           ) : isListening ? (
             <>
               <MicOff className="w-5 h-5" />
-              Stop Speaking
+              Mute
             </>
           ) : (
             <>
               <Mic className="w-5 h-5" />
-              Start Speaking
+              Unmute
             </>
           )}
         </button>
@@ -328,9 +407,15 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
             ref={canvasRef}
             width={640}
             height={80}
-            className="w-full h-full"
+            className="absolute inset-0 w-full h-full"
           />
-          {!isListening && !isConnecting && (
+          <canvas
+            ref={aiCanvasRef}
+            width={640}
+            height={80}
+            className="absolute inset-0 w-full h-full"
+          />
+          {!sessionActive && !isConnecting && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-gray-500 text-sm">Audio visualization will appear here</p>
             </div>
@@ -340,11 +425,13 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
         {/* Control Button and Status */}
         <div className="flex items-center gap-4">
           <button
-            onClick={isListening ? stopListening : startListening}
+            onClick={sessionActive ? (isListening ? mute : unmute) : startSession}
             disabled={isConnecting}
             className={`py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${
-              isListening
-                ? 'bg-red-500 hover:bg-red-600 text-white'
+              sessionActive
+                ? isListening
+                  ? 'bg-red-500 hover:bg-red-600 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
                 : isConnecting
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
@@ -355,15 +442,20 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
                 <Loader2 className="w-5 h-5 animate-spin" />
                 Connecting...
               </>
+            ) : !sessionActive ? (
+              <>
+                <Mic className="w-5 h-5" />
+                Start Creating
+              </>
             ) : isListening ? (
               <>
                 <MicOff className="w-5 h-5" />
-                Stop Speaking
+                Mute
               </>
             ) : (
               <>
                 <Mic className="w-5 h-5" />
-                Start Speaking
+                Unmute
               </>
             )}
           </button>
@@ -405,9 +497,15 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
             ref={canvasRef}
             width={640}
             height={128}
-            className="w-full h-full"
+            className="absolute inset-0 w-full h-full"
           />
-          {!isListening && !isConnecting && (
+          <canvas
+            ref={aiCanvasRef}
+            width={640}
+            height={128}
+            className="absolute inset-0 w-full h-full"
+          />
+          {!sessionActive && !isConnecting && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-gray-500">Audio visualization will appear here</p>
             </div>
@@ -416,11 +514,13 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
 
         {/* Control Button */}
         <button
-          onClick={isListening ? stopListening : startListening}
+          onClick={sessionActive ? (isListening ? mute : unmute) : startSession}
           disabled={isConnecting}
           className={`w-full py-4 px-6 rounded-xl font-medium transition-all transform hover:scale-105 flex items-center justify-center gap-3 ${
-            isListening
-              ? 'bg-red-500 hover:bg-red-600 text-white'
+            sessionActive
+              ? isListening
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-red-500 hover:bg-red-600 text-white'
               : isConnecting
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
@@ -431,15 +531,20 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
               <Loader2 className="w-5 h-5 animate-spin" />
               Connecting...
             </>
+          ) : !sessionActive ? (
+            <>
+              <Mic className="w-5 h-5" />
+              Start Creating
+            </>
           ) : isListening ? (
             <>
               <MicOff className="w-5 h-5" />
-              Stop Speaking
+              Mute
             </>
           ) : (
             <>
               <Mic className="w-5 h-5" />
-              Start Speaking
+              Unmute
             </>
           )}
         </button>
