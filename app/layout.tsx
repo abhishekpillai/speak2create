@@ -20,6 +20,14 @@ export const metadata: Metadata = {
     title: "speak2create - Voice-Powered Image Generation",
     description: "Transform your voice into stunning images with AI",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "speak2create logo with tagline 'Create and edit images with your voice'",
+      },
+    ],
   },
 };
 
