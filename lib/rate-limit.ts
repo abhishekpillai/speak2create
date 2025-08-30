@@ -58,7 +58,7 @@ export async function checkIPRateLimit(ip: string): Promise<RateLimitResult> {
         success,
         limit,
         remaining,
-        reset,
+        reset: new Date(reset), // Convert timestamp to Date
         error: success ? undefined : 'IP rate limit exceeded'
       };
     } else {
@@ -70,7 +70,7 @@ export async function checkIPRateLimit(ip: string): Promise<RateLimitResult> {
         success: result.success,
         limit: result.limit,
         remaining: result.remaining,
-        reset: result.reset,
+        reset: result.reset, // Already a Date object
         error: result.success ? undefined : 'IP rate limit exceeded'
       };
     }
@@ -94,7 +94,7 @@ export async function checkAPIRateLimit(ip: string): Promise<RateLimitResult> {
         success,
         limit,
         remaining,
-        reset,
+        reset: new Date(reset), // Convert timestamp to Date
         error: success ? undefined : 'API rate limit exceeded'
       };
     } else {
@@ -106,7 +106,7 @@ export async function checkAPIRateLimit(ip: string): Promise<RateLimitResult> {
         success: result.success,
         limit: result.limit,
         remaining: result.remaining,
-        reset: result.reset,
+        reset: result.reset, // Already a Date object
         error: result.success ? undefined : 'API rate limit exceeded'
       };
     }
