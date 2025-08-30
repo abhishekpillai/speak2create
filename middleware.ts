@@ -29,7 +29,7 @@ const allowedCountries = [
 
 export async function middleware(request: NextRequest) {
   // Geographic filtering - check country before processing
-  const country = request.geo?.country;
+  const country = (request as any).geo?.country;
   if (country && !allowedCountries.includes(country)) {
     return new Response(
       JSON.stringify({
