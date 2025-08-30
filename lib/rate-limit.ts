@@ -2,8 +2,11 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { RATE_LIMITS, REDIS_KEYS } from './constants';
 
-// Initialize Upstash Redis client from environment variables
-const redis = Redis.fromEnv();
+// Initialize Upstash Redis client from KV environment variables
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 
 // Create rate limiters for different types of requests
 export const ipGenerationLimiter = new Ratelimit({
