@@ -12,9 +12,9 @@ export const RATE_LIMITS = {
 } as const;
 
 export const RATE_LIMIT_ERRORS = {
-  IP_LIMIT_EXCEEDED: 'IP rate limit exceeded. You can generate 5 images per hour.',
-  SESSION_LIMIT_EXCEEDED: 'Session limit exceeded. You can generate 3 images per 30-minute session.',
-  API_LIMIT_EXCEEDED: 'Too many requests. Please try again in a few minutes.',
+  IP_LIMIT_EXCEEDED: 'System is at capacity. Please try again in a few minutes.',
+  SESSION_LIMIT_EXCEEDED: 'System is at capacity. Please try again in a few minutes.',
+  API_LIMIT_EXCEEDED: 'System is experiencing high demand. Please try again shortly.',
 } as const;
 
 export const REDIS_KEYS = {

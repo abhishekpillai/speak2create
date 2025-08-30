@@ -188,13 +188,16 @@ export default function Home() {
               )}
             </div>
 
-            {/* Mobile Usage Limits & Tips */}
-            <div className="lg:hidden mt-6 space-y-4">
+            {/* Mobile Tips - Show below on small screens */}
+            <div className="lg:hidden mt-6 space-y-3">
+              {/* Usage Limit Message (only shows when at limit) */}
               <UsageLimits 
                 sessionId={sessionId}
                 rateLimitInfo={rateLimitInfo}
                 compact={true}
               />
+              
+              {/* Tips */}
               <div className="flex flex-wrap justify-center gap-2">
                 <span className="text-xs text-gray-500">Try:</span>
                 <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
@@ -207,13 +210,37 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Side - Usage Limits */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <UsageLimits 
-              sessionId={sessionId}
-              rateLimitInfo={rateLimitInfo}
-              compact={true}
-            />
+          {/* Right Side - Tips and Usage */}
+          <div className="hidden lg:block w-48 flex-shrink-0">
+            <div className="space-y-4">
+              {/* Usage Limit Message (only shows when at limit) */}
+              <UsageLimits 
+                sessionId={sessionId}
+                rateLimitInfo={rateLimitInfo}
+                compact={true}
+              />
+              
+              {/* Quick Tips */}
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+                  Quick tips
+                </p>
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div className="flex items-start gap-2">
+                    <span className="text-gray-400">→</span>
+                    <span>Be descriptive for better results</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-gray-400">→</span>
+                    <span>You can edit any generated image</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-gray-400">→</span>
+                    <span>Click image to view fullscreen</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
