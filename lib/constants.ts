@@ -1,11 +1,11 @@
 export const RATE_LIMITS = {
-  // IP-based rate limiting: 5 generations per hour per IP
-  IP_GENERATIONS_PER_HOUR: 5,
+  // IP-based rate limiting: 10 generations per hour per IP (increased for better UX)
+  IP_GENERATIONS_PER_HOUR: 10,
   IP_WINDOW_MINUTES: 60,
   
-  // Session-based limits: 3 images per 30-minute session
-  SESSION_IMAGES_LIMIT: 3,
-  SESSION_WINDOW_MINUTES: 30,
+  // Session-based limits: 5 images per 20-minute session (increased limit, reduced window)
+  SESSION_IMAGES_LIMIT: 5,
+  SESSION_WINDOW_MINUTES: 20,
   
   // General API rate limiting
   API_REQUESTS_PER_MINUTE: 20,
