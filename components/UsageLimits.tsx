@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { RATE_LIMITS } from '@/lib/constants';
 
 interface RateLimitInfo {
   ipRemaining?: number;
@@ -36,9 +37,9 @@ export default function UsageLimits({ sessionId, rateLimitInfo, compact = false 
     // Use rateLimitInfo from API if available, otherwise fetch
     if (rateLimitInfo) {
       setUsageInfo({
-        remainingGenerations: rateLimitInfo.ipRemaining || 5,
+        remainingGenerations: rateLimitInfo.ipRemaining || RATE_LIMITS.IP_GENERATIONS_PER_HOUR,
         sessionImagesUsed: rateLimitInfo.sessionImagesUsed || 0,
-        sessionImagesRemaining: rateLimitInfo.sessionImagesRemaining || 3,
+        sessionImagesRemaining: rateLimitInfo.sessionImagesRemaining || RATE_LIMITS.SESSION_IMAGES_LIMIT,
         sessionResetTime: rateLimitInfo.sessionResetTime,
         resetTime: rateLimitInfo.ipResetTime,
       });
@@ -51,7 +52,7 @@ export default function UsageLimits({ sessionId, rateLimitInfo, compact = false 
     return null;
   }
 
-  const sessionRemaining = usageInfo.sessionImagesRemaining || 3;
+  const sessionRemaining = usageInfo.sessionImagesRemaining || RATE_LIMITS.SESSION_IMAGES_LIMIT;
   const isLimitReached = sessionRemaining <= 0;
 
   // Only show message when limit is reached
