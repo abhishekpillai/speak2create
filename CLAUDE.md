@@ -37,12 +37,15 @@ rm -rf .next && npm run dev
 - `lib/gemini.ts`: Google Gemini 2.5 Flash Image API wrapper with prompt enhancement
 - `app/api/generate/route.ts`: New image generation endpoint
 - `app/api/edit/route.ts`: Image editing endpoint for modifications
+- `lib/memegen.ts`: Memegen.link API integration with template search and fuzzy matching
+- `app/api/meme/route.ts`: Meme generation endpoint with rate limiting
 - `ImageDisplay.tsx`: Image viewer with fullscreen, save/download, and clear actions
 
 **AI Decision Logic:**
-- OpenAI Realtime API decides between `generate_image` vs `edit_image` function calls
-- Critical instructions differentiate generation ("create", "generate") vs editing ("make it", "add", "remove")
-- Function calls bridge voice AI → Next.js API → Gemini API
+- OpenAI Realtime API decides between `generate_image`, `edit_image`, and `create_meme` function calls
+- Recognizes meme requests through natural language (e.g., "Drake meme", "distracted boyfriend")
+- Critical instructions differentiate generation ("create", "generate") vs editing ("make it", "add", "remove") vs meme creation
+- Function calls bridge voice AI → Next.js API → Gemini/Memegen APIs
 
 ### Key Integration Patterns
 
@@ -61,6 +64,36 @@ This codebase has complex nested callback patterns that require careful state ma
 - Comprehensive console logging at each pipeline stage
 - API key validation in all endpoints
 - Graceful fallbacks for unsupported browsers (File System Access API)
+
+### Meme Generation System
+
+**Template Recognition & Matching:**
+- Natural language meme template search with fuzzy matching
+- Support for 100+ popular meme formats from memegen.link
+- Aliases for common meme names (e.g., "Drake pointing" → "drake")
+- Voice commands like "Create a Drake meme about coffee"
+
+**Integration Flow:**
+1. Voice command recognized with "meme" keywords
+2. OpenAI calls `create_meme` function with template and text
+3. Template fuzzy search finds best match
+4. Memegen.link API generates meme with proper text encoding
+5. Image returned as base64 data URL for consistency
+6. Meme becomes editable with existing image editing features
+
+**Popular Templates:**
+- Drake (Drakeposting)
+- Distracted Boyfriend
+- Woman Yelling at Cat
+- Expanding Brain
+- Two Buttons
+- Success Kid
+- Change My Mind
+
+**Text Encoding:**
+- Spaces converted to underscores
+- Special characters properly escaped for URL
+- Support for multi-panel memes with custom text arrays
 
 ## Testing Strategy
 
@@ -151,6 +184,12 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 - Check console for token expiry (60s limit)
 - Verify microphone permissions granted
 
+**Meme Generation Not Working:**
+- Verify memegen.link API is accessible (no API key required)
+- Check template name matches available templates
+- Ensure text doesn't contain problematic special characters
+- Review rate limiting if getting 429 errors
+
 ## File Organization
 
 ```
@@ -161,6 +200,7 @@ app/
 │   │   └── route.test.ts  # API route tests
 │   ├── edit/          # Image modification via Gemini
 │   │   └── route.test.ts  # API route tests
+│   ├── meme/          # Meme generation via memegen.link
 │   └── usage/         # Rate limit usage information
 ├── layout.tsx         # Root layout with Analytics integration
 ├── page.tsx           # Main app with voice/image state management
@@ -176,6 +216,7 @@ lib/
 ├── openai-realtime.ts # Custom WebRTC client for OpenAI streaming
 ├── gemini.ts          # Google Gemini API wrapper with prompt enhancement
 ├── gemini.test.ts     # Gemini client tests
+├── memegen.ts         # Memegen.link API client with template matching
 ├── rate-limit.ts      # Rate limiting logic with Upstash Redis
 ├── rate-limit.test.ts # Rate limiting tests
 └── constants.ts       # Rate limits and configuration constants
@@ -200,6 +241,7 @@ Current per-session costs (~$1.62 for 5 minutes):
 - Voice input: ~$0.30
 - Voice output: ~$1.20  
 - Image generation: ~$0.12 (3 images)
+- Meme generation: $0.00 (free via memegen.link, rate limited for abuse prevention)
 
 **Cost Protection Implemented:**
 - Rate limiting prevents runaway usage (10 generations/hour per IP, 5 per session)

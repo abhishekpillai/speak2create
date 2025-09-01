@@ -55,6 +55,45 @@ export default function Home() {
     }
   };
 
+  const handleMemeGenerate = async (template: string, topText?: string, bottomText?: string) => {
+    try {
+      setIsLoading(true);
+      setRateLimitError(null);
+
+      const response = await fetch("/api/meme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          template,
+          topText,
+          bottomText,
+          session_id: sessionId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          setRateLimitError(data.message || "Rate limit exceeded");
+          setRateLimitInfo(data.rateLimitInfo || data.sessionInfo);
+        } else {
+          throw new Error(data.error || "Failed to generate meme");
+        }
+        return;
+      }
+
+      setCurrentImage(data.imageUrl);
+      setUploadedImageId(null); // Clear uploaded image when generating new meme
+      setRateLimitInfo(data.rateLimitInfo);
+    } catch (error) {
+      console.error("Meme generation error:", error);
+      setRateLimitError("Failed to generate meme. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleImageEdit = useCallback(async (instruction: string) => {
     console.log('📝 handleImageEdit called with:', { instruction, hasImage: !!currentImage, hasUploadedImage: !!uploadedImageId });
     if (!currentImage) {
@@ -166,6 +205,9 @@ export default function Home() {
                 {!currentImage ? (
                   <>
                     <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                      "Create a Drake meme about coffee"
+                    </div>
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
                       "Generate a sunset over mountains"
                     </div>
                     <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
@@ -234,6 +276,7 @@ export default function Home() {
               <VoiceControl
                 onImageGenerate={handleImageGenerate}
                 onImageEdit={handleImageEdit}
+                onMemeGenerate={handleMemeGenerate}
                 currentImage={currentImage}
                 onListeningChange={setIsListening}
                 ultraCompact={true}
@@ -265,6 +308,9 @@ export default function Home() {
                 <span className="text-xs text-gray-500">Try:</span>
                 {!currentImage ? (
                   <>
+                    <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                      "Drake meme"
+                    </span>
                     <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
                       "Generate a sunset"
                     </span>
