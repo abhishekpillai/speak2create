@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GeminiClient } from '@/lib/gemini';
+import { sessionImageStore } from '@/lib/image-store';
 import { checkIPRateLimit, checkSessionLimit, incrementSessionUsage, getClientIP } from '@/lib/rate-limit';
 import { RATE_LIMIT_ERRORS } from '@/lib/constants';
 
@@ -15,20 +16,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { image_id, image_data, edit_instruction, session_id } = await request.json();
-    console.log('📝 Edit request data:', { 
-      has_image_data: !!image_data, 
-      image_data_length: image_data?.length,
-      edit_instruction, 
-      session_id 
+    const { base_image_id, edit_instruction, session_id } = await request.json();
+    console.log('📝 Edit request data:', {
+      base_image_id,
+      edit_instruction,
+      session_id
     });
 
-    if (!image_data || !edit_instruction) {
+    if (!base_image_id || !edit_instruction) {
       return NextResponse.json(
-        { error: 'Image data and edit instruction are required' },
+        { error: 'Base image id and edit instruction are required' },
         { status: 400 }
       );
     }
+
+    const stored = sessionImageStore.getImage(session_id, base_image_id);
+    if (!stored) {
+      return NextResponse.json(
+        { error: 'Session expired. Please upload your image again.' },
+        { status: 400 }
+      );
+    }
+
+    const mime = stored.metadata.format === 'jpg' ? 'image/jpeg' : `image/${stored.metadata.format}`;
+    const image_data = `data:${mime};base64,${stored.data.toString('base64')}`;
 
     // Get client IP for rate limiting
     const clientIP = getClientIP(request);
@@ -70,8 +81,9 @@ export async function POST(request: NextRequest) {
     console.log('🤖 Calling Gemini client editImage...');
     const client = new GeminiClient(apiKey);
     const result = await client.editImage({
-      imageId: image_id,
+      imageId: base_image_id,
       imageData: image_data,
+      mimeType: mime,
       editInstruction: edit_instruction,
       sessionId: session_id
     });
