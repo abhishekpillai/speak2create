@@ -214,6 +214,8 @@ export default function VoiceControl({
         voice: 'alloy',
         instructions: `You are a voice-controlled image creation assistant. Images appear instantly on the user's screen when you use functions.
 
+Start by greeting the user warmly and asking what they'd like to create.
+
 You will receive context updates telling you when images are available or cleared. Pay attention to these updates to make correct function choices.
 
 CRITICAL DECISION LOGIC:
@@ -321,9 +323,6 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       setIsListening(true);
       setIsConnecting(false);
       setStatus('Listening... Speak your command');
-
-      // Greet the user
-      client.sendText('Please welcome the user and ask them what they would like to create.');
     } catch (error) {
       console.error('Failed to start listening:', error);
       setStatus('Failed to connect. Please try again.');
