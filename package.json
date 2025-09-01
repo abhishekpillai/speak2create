@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run"
   },
   "dependencies": {
     "@google/genai": "^1.16.0",
@@ -28,6 +29,8 @@
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "ts-node": "^10.9.2",
+    "vitest": "^1.6.0"
   }
 }
