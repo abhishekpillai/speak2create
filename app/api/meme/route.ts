@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Rate limit exceeded',
-          message: RATE_LIMIT_ERRORS.IP_EXCEEDED,
+          message: RATE_LIMIT_ERRORS.IP_LIMIT_EXCEEDED,
           rateLimitInfo: {
             ipGenerationsUsed: ipRateLimit.limit - ipRateLimit.remaining,
             ipGenerationsRemaining: ipRateLimit.remaining,
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error: 'Session limit exceeded',
-            message: RATE_LIMIT_ERRORS.SESSION_EXCEEDED,
+            message: RATE_LIMIT_ERRORS.SESSION_LIMIT_EXCEEDED,
             sessionInfo: {
               sessionImagesUsed: sessionLimit.imagesUsed,
               sessionImagesRemaining: sessionLimit.imagesRemaining,
