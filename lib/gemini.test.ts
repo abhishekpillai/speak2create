@@ -40,6 +40,7 @@ describe('GeminiClient', () => {
     const response = await client.editImage({
       imageId: '1',
       imageData: 'data:image/png;base64,ABC123',
+      mimeType: 'image/png',
       editInstruction: 'make it blue',
       sessionId: 's1'
     });

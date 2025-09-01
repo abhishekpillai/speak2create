@@ -3,16 +3,19 @@
 import { useState, useCallback } from "react";
 import VoiceControl from "@/components/VoiceControl";
 import ImageDisplay from "@/components/ImageDisplay";
+import ImageUploader from "@/components/ImageUploader";
 import UsageLimits from "@/components/UsageLimits";
 import { Sparkles } from "lucide-react";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [uploadedImageId, setUploadedImageId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [sessionId] = useState(`session_${Date.now()}`);
   const [rateLimitInfo, setRateLimitInfo] = useState<any>(null);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleImageGenerate = async (prompt: string) => {
     try {
@@ -41,6 +44,7 @@ export default function Home() {
       }
 
       setCurrentImage(data.imageUrl);
+      setUploadedImageId(null); // Clear uploaded image when generating new one
       setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
       console.error("Image generation error:", error);
@@ -51,7 +55,7 @@ export default function Home() {
   };
 
   const handleImageEdit = useCallback(async (instruction: string) => {
-    console.log('📝 handleImageEdit called with:', { instruction, hasImage: !!currentImage });
+    console.log('📝 handleImageEdit called with:', { instruction, hasImage: !!currentImage, hasUploadedImage: !!uploadedImageId });
     if (!currentImage) {
       console.warn('⚠️ handleImageEdit called but no current image');
       return;
@@ -62,14 +66,23 @@ export default function Home() {
       setIsLoading(true);
       setRateLimitError(null);
 
+      // Determine which edit flow to use
+      const requestBody = uploadedImageId 
+        ? {
+            base_image_id: uploadedImageId,
+            edit_instruction: instruction,
+            session_id: sessionId,
+          }
+        : {
+            image_data: currentImage,
+            edit_instruction: instruction,
+            session_id: sessionId,
+          };
+
       const response = await fetch("/api/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image_data: currentImage,
-          edit_instruction: instruction,
-          session_id: sessionId,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -94,11 +107,27 @@ export default function Home() {
       console.log('🔄 Edit complete, setting loading to false');
       setIsLoading(false);
     }
-  }, [currentImage, sessionId]);
+  }, [currentImage, uploadedImageId, sessionId]);
 
   const handleClear = () => {
     setCurrentImage(null);
+    setUploadedImageId(null);
   };
+
+  const handleImageUpload = useCallback((result: any) => {
+    setCurrentImage(result.image_url);
+    setUploadedImageId(result.image_id);
+    setUploadError(null);
+    setRateLimitError(null);
+    setRateLimitInfo({
+      sessionImagesUsed: result.session_limits.images_used,
+      sessionImagesRemaining: result.session_limits.max_images - result.session_limits.images_used,
+    });
+  }, []);
+
+  const handleUploadError = useCallback((error: string) => {
+    setUploadError(error);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -129,16 +158,24 @@ export default function Home() {
                 Try saying
               </p>
               <div className="space-y-2">
-                <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
-                  "Generate a sunset over mountains"
-                </div>
-                <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
-                  "Create a cute robot in a garden"
-                </div>
-                {currentImage && (
-                  <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
-                    "Make the sky more vibrant"
-                  </div>
+                {!currentImage ? (
+                  <>
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                      "Generate a sunset over mountains"
+                    </div>
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                      Upload a photo to edit
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                      "Make the sky more vibrant"
+                    </div>
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                      "Add some warm lighting"
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -153,19 +190,28 @@ export default function Home() {
               </h2>
               <p className="text-base text-gray-500">
                 {currentImage
-                  ? "Edit with voice or save your masterpiece"
-                  : "Just describe what you want to see"}
+                  ? (uploadedImageId ? "Edit your photo with voice commands" : "Edit with voice or save your masterpiece")
+                  : "Upload a photo to edit or describe what you want to create"}
               </p>
             </div>
 
-            {/* Image Display - Smaller, Centered */}
+            {/* Image Display or Upload - Smaller, Centered */}
             <div className="w-full max-w-xl mb-6">
-              <ImageDisplay
-                imageUrl={currentImage}
-                isLoading={isLoading}
-                onClear={handleClear}
-                centered={true}
-              />
+              {currentImage ? (
+                <ImageDisplay
+                  imageUrl={currentImage}
+                  isLoading={isLoading}
+                  onClear={handleClear}
+                  centered={true}
+                />
+              ) : (
+                <ImageUploader
+                  sessionId={sessionId}
+                  onUpload={handleImageUpload}
+                  onError={handleUploadError}
+                  disabled={isLoading}
+                />
+              )}
             </div>
 
             {/* Voice Control - Compact, Centered */}
@@ -177,12 +223,25 @@ export default function Home() {
                 onListeningChange={setIsListening}
                 ultraCompact={true}
               />
+
+              {/* Upload New Button - Show when image exists */}
+              {currentImage && (
+                <div className="mt-3 flex justify-center">
+                  <ImageUploader
+                    sessionId={sessionId}
+                    onUpload={handleImageUpload}
+                    onError={handleUploadError}
+                    disabled={isLoading}
+                    compact={true}
+                  />
+                </div>
+              )}
               
-              {/* Rate Limit Error */}
-              {rateLimitError && (
+              {/* Errors */}
+              {(uploadError || rateLimitError) && (
                 <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-700 font-medium">
-                    {rateLimitError}
+                    {uploadError || rateLimitError}
                   </p>
                 </div>
               )}
@@ -200,12 +259,25 @@ export default function Home() {
               {/* Tips */}
               <div className="flex flex-wrap justify-center gap-2">
                 <span className="text-xs text-gray-500">Try:</span>
-                <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
-                  "Generate a sunset"
-                </span>
-                <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
-                  "Create a robot"
-                </span>
+                {!currentImage ? (
+                  <>
+                    <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                      "Generate a sunset"
+                    </span>
+                    <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                      Upload & edit
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                      "Make it warmer"
+                    </span>
+                    <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                      "Add lighting"
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -228,11 +300,11 @@ export default function Home() {
                 <div className="space-y-2 text-xs text-gray-600">
                   <div className="flex items-start gap-2">
                     <span className="text-gray-400">→</span>
-                    <span>Be descriptive for better results</span>
+                    <span>Upload photos to edit with voice</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-gray-400">→</span>
-                    <span>You can edit any generated image</span>
+                    <span>Be descriptive for better results</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-gray-400">→</span>

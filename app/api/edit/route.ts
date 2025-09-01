@@ -16,30 +16,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { base_image_id, edit_instruction, session_id } = await request.json();
+    const { base_image_id, image_data, edit_instruction, session_id } = await request.json();
     console.log('📝 Edit request data:', {
       base_image_id,
+      hasImageData: !!image_data,
       edit_instruction,
       session_id
     });
 
-    if (!base_image_id || !edit_instruction) {
+    if (!edit_instruction) {
       return NextResponse.json(
-        { error: 'Base image id and edit instruction are required' },
+        { error: 'Edit instruction is required' },
         { status: 400 }
       );
     }
 
-    const stored = sessionImageStore.getImage(session_id, base_image_id);
-    if (!stored) {
+    let finalImageData: string;
+    let mime: string;
+
+    // Handle uploaded image flow (with base_image_id)
+    if (base_image_id) {
+      const stored = sessionImageStore.getImage(session_id, base_image_id);
+      if (!stored) {
+        return NextResponse.json(
+          { error: 'Session expired. Please upload your image again.' },
+          { status: 400 }
+        );
+      }
+      mime = stored.metadata.format === 'jpg' ? 'image/jpeg' : `image/${stored.metadata.format}`;
+      finalImageData = `data:${mime};base64,${stored.data.toString('base64')}`;
+    } 
+    // Handle generated image flow (with image_data)
+    else if (image_data) {
+      finalImageData = image_data;
+      // Extract mime type from data URI
+      const mimeMatch = image_data.match(/^data:([^;]+);base64,/);
+      mime = mimeMatch ? mimeMatch[1] : 'image/png';
+    } 
+    // Neither provided
+    else {
       return NextResponse.json(
-        { error: 'Session expired. Please upload your image again.' },
+        { error: 'Either base_image_id or image_data is required' },
         { status: 400 }
       );
     }
-
-    const mime = stored.metadata.format === 'jpg' ? 'image/jpeg' : `image/${stored.metadata.format}`;
-    const image_data = `data:${mime};base64,${stored.data.toString('base64')}`;
 
     // Get client IP for rate limiting
     const clientIP = getClientIP(request);
@@ -81,8 +101,8 @@ export async function POST(request: NextRequest) {
     console.log('🤖 Calling Gemini client editImage...');
     const client = new GeminiClient(apiKey);
     const result = await client.editImage({
-      imageId: base_image_id,
-      imageData: image_data,
+      imageId: base_image_id || 'generated_image',
+      imageData: finalImageData,
       mimeType: mime,
       editInstruction: edit_instruction,
       sessionId: session_id
