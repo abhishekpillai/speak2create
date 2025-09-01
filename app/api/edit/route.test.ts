@@ -13,6 +13,14 @@ vi.mock('@/lib/rate-limit', () => ({
   getClientIP,
 }));
 
+const getImage = vi.fn();
+const sessionImageStore = {
+  getImage,
+};
+vi.mock('@/lib/image-store', () => ({
+  sessionImageStore,
+}));
+
 const editImage = vi.fn();
 class MockGeminiClient {
   editImage = editImage;
@@ -28,11 +36,22 @@ beforeEach(() => {
 });
 
 describe('POST /api/edit', () => {
-  it('returns 400 when image data or instruction missing', async () => {
+  it('returns 400 when instruction missing', async () => {
     const { POST } = await import('./route');
     const req = new NextRequest('http://localhost', {
       method: 'POST',
       body: JSON.stringify({ session_id: 's1' }),
+      headers: { 'content-type': 'application/json' },
+    });
+    const res = await POST(req as any);
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when neither image_data nor base_image_id provided', async () => {
+    const { POST } = await import('./route');
+    const req = new NextRequest('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify({ edit_instruction: 'inst', session_id: 's1' }),
       headers: { 'content-type': 'application/json' },
     });
     const res = await POST(req as any);
@@ -44,7 +63,7 @@ describe('POST /api/edit', () => {
     const { POST } = await import('./route');
     const req = new NextRequest('http://localhost', {
       method: 'POST',
-      body: JSON.stringify({ image_data: 'data', edit_instruction: 'inst', session_id: 's1' }),
+      body: JSON.stringify({ image_data: 'data:image/png;base64,ABC123', edit_instruction: 'inst', session_id: 's1' }),
       headers: { 'content-type': 'application/json' },
     });
     const res = await POST(req as any);
@@ -57,14 +76,14 @@ describe('POST /api/edit', () => {
     const { POST } = await import('./route');
     const req = new NextRequest('http://localhost', {
       method: 'POST',
-      body: JSON.stringify({ image_data: 'data', edit_instruction: 'inst', session_id: 's1' }),
+      body: JSON.stringify({ image_data: 'data:image/png;base64,ABC123', edit_instruction: 'inst', session_id: 's1' }),
       headers: { 'content-type': 'application/json' },
     });
     const res = await POST(req as any);
     expect(res.status).toBe(429);
   });
 
-  it('returns 200 on success', async () => {
+  it('returns 200 on success with image_data', async () => {
     checkIPRateLimit.mockResolvedValueOnce({ success: true, limit: 5, remaining: 5, reset: new Date() });
     checkSessionLimit.mockResolvedValueOnce({ success: true, imagesUsed: 0, imagesRemaining: 3, resetTime: new Date() });
     getClientIP.mockReturnValue('1.1.1.1');
@@ -72,7 +91,7 @@ describe('POST /api/edit', () => {
     const { POST } = await import('./route');
     const req = new NextRequest('http://localhost', {
       method: 'POST',
-      body: JSON.stringify({ image_data: 'data', edit_instruction: 'inst', session_id: 's1' }),
+      body: JSON.stringify({ image_data: 'data:image/png;base64,ABC123', edit_instruction: 'inst', session_id: 's1' }),
       headers: { 'content-type': 'application/json' },
     });
     const res = await POST(req as any);
@@ -80,6 +99,37 @@ describe('POST /api/edit', () => {
     const data = await res.json();
     expect(data.imageUrl).toBe('url');
     expect(incrementSessionUsage).toHaveBeenCalledWith('s1');
+  });
+
+  it('returns 200 on success with base_image_id', async () => {
+    checkIPRateLimit.mockResolvedValueOnce({ success: true, limit: 5, remaining: 5, reset: new Date() });
+    checkSessionLimit.mockResolvedValueOnce({ success: true, imagesUsed: 0, imagesRemaining: 3, resetTime: new Date() });
+    getClientIP.mockReturnValue('1.1.1.1');
+    getImage.mockReturnValueOnce({ data: Buffer.from('ABC123', 'base64'), metadata: { format: 'png' } });
+    editImage.mockResolvedValueOnce({ imageUrl: 'url', imageId: 'img', processedPrompt: 'p' });
+    const { POST } = await import('./route');
+    const req = new NextRequest('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify({ base_image_id: 'img123', edit_instruction: 'inst', session_id: 's1' }),
+      headers: { 'content-type': 'application/json' },
+    });
+    const res = await POST(req as any);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.imageUrl).toBe('url');
+    expect(incrementSessionUsage).toHaveBeenCalledWith('s1');
+  });
+
+  it('returns 400 when base_image_id not found', async () => {
+    getImage.mockReturnValueOnce(null);
+    const { POST } = await import('./route');
+    const req = new NextRequest('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify({ base_image_id: 'img123', edit_instruction: 'inst', session_id: 's1' }),
+      headers: { 'content-type': 'application/json' },
+    });
+    const res = await POST(req as any);
+    expect(res.status).toBe(400);
   });
 
   it('returns 500 when API key missing', async () => {

@@ -77,9 +77,23 @@ export default function VoiceControl({
   // Add a ref to track current image state for the realtime client
   const currentImageRef = useRef(currentImage);
   useEffect(() => {
+    const previousImage = currentImageRef.current;
     currentImageRef.current = currentImage;
     console.log('🖼️ currentImage updated in VoiceControl:', !!currentImage);
-  }, [currentImage]);
+    
+    // Send context update to AI when image state changes
+    if (clientRef.current && sessionActive) {
+      if (!previousImage && currentImage) {
+        // Image was uploaded/generated
+        console.log('📤 Sending context: Image now available');
+        clientRef.current.sendText('Context update: An image is now displayed on screen and available for editing.');
+      } else if (previousImage && !currentImage) {
+        // Image was cleared
+        console.log('📤 Sending context: Image cleared');
+        clientRef.current.sendText('Context update: No image is currently displayed on screen.');
+      }
+    }
+  }, [currentImage, sessionActive]);
 
   // Refs to always use the latest callbacks in realtime handlers
   const onImageEditRef = useRef(onImageEdit);
@@ -200,9 +214,13 @@ export default function VoiceControl({
         voice: 'alloy',
         instructions: `You are a voice-controlled image creation assistant. Images appear instantly on the user's screen when you use functions.
 
+Start by greeting the user warmly and asking what they'd like to create.
+
+You will receive context updates telling you when images are available or cleared. Pay attention to these updates to make correct function choices.
+
 CRITICAL DECISION LOGIC:
-- If NO image exists on screen: Any descriptive request should call generate_image (e.g., "a sunset", "cute cat", "mountain landscape")
-- If an image EXISTS on screen: 
+- When NO image is on screen: Any descriptive request should call generate_image (e.g., "a sunset", "cute cat", "mountain landscape")
+- When an image IS on screen: 
   * Modification requests should call edit_image (e.g., "make it brighter", "add clouds", "change to night", "remove the tree")
   * Requests starting with "new", "create", "generate", "start over", "different" should call generate_image for a fresh image
   
@@ -305,9 +323,6 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       setIsListening(true);
       setIsConnecting(false);
       setStatus('Listening... Speak your command');
-
-      // Greet the user
-      client.sendText('Please welcome the user and ask them what they would like to create.');
     } catch (error) {
       console.error('Failed to start listening:', error);
       setStatus('Failed to connect. Please try again.');
