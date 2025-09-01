@@ -7,7 +7,8 @@
       "WebSearch",
       "Bash(gh issue view:*)",
       "Bash(gh issue:*)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []
