@@ -11,15 +11,17 @@ interface VoiceControlProps {
   onListeningChange?: (isListening: boolean) => void;
   compact?: boolean;
   ultraCompact?: boolean;
+  onSessionStart?: () => void;
 }
 
-export default function VoiceControl({ 
-  onImageGenerate, 
-  onImageEdit, 
+export default function VoiceControl({
+  onImageGenerate,
+  onImageEdit,
   currentImage,
   onListeningChange,
   compact = false,
-  ultraCompact = false
+  ultraCompact = false,
+  onSessionStart
 }: VoiceControlProps) {
   const [isListening, setIsListening] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -86,11 +88,11 @@ export default function VoiceControl({
       if (!previousImage && currentImage) {
         // Image was uploaded/generated
         console.log('📤 Sending context: Image now available');
-        clientRef.current.sendText('Context update: An image is now displayed on screen and available for editing.');
+        clientRef.current.sendContext('Context update: An image is now displayed on screen and available for editing.');
       } else if (previousImage && !currentImage) {
         // Image was cleared
         console.log('📤 Sending context: Image cleared');
-        clientRef.current.sendText('Context update: No image is currently displayed on screen.');
+        clientRef.current.sendContext('Context update: No image is currently displayed on screen.');
       }
     }
   }, [currentImage, sessionActive]);
@@ -323,12 +325,15 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       setIsListening(true);
       setIsConnecting(false);
       setStatus('Listening... Speak your command');
+      if (onSessionStart) {
+        onSessionStart();
+      }
     } catch (error) {
       console.error('Failed to start listening:', error);
       setStatus('Failed to connect. Please try again.');
       setIsConnecting(false);
     }
-  }, [onImageEdit, onImageGenerate, currentImage]);
+  }, [onImageEdit, onImageGenerate, currentImage, onSessionStart]);
 
   const mute = () => {
     localStreamRef.current?.getAudioTracks().forEach(track => (track.enabled = false));

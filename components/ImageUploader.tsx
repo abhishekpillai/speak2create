@@ -25,9 +25,10 @@ interface ImageUploaderProps {
   compact?: boolean; // For showing as a smaller button when image exists
   overlay?: boolean; // For showing as an overlay on the placeholder
   placeholder?: boolean; // For showing as the main placeholder area
+  inactiveMessage?: string; // Message to show when disabled in placeholder mode
 }
 
-export default function ImageUploader({ sessionId, onUpload, onError, disabled = false, compact = false, overlay = false, placeholder = false }: ImageUploaderProps) {
+export default function ImageUploader({ sessionId, onUpload, onError, disabled = false, compact = false, overlay = false, placeholder = false, inactiveMessage }: ImageUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -192,7 +193,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
             <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
             <div className="w-full max-w-xs">
               <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                <div 
+                <div
                   className="bg-blue-600 h-full transition-all duration-200 ease-out"
                   style={{ width: `${uploadProgress}%` }}
                 />
@@ -209,11 +210,13 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
             </div>
             <div className="text-center">
               <p className="text-gray-500 mb-1">
-                Your image will appear here
+                {disabled && inactiveMessage ? inactiveMessage : 'Your image will appear here'}
               </p>
-              <p className="text-sm text-gray-400">
-                or click to upload a photo to edit
-              </p>
+              {!(disabled && inactiveMessage) && (
+                <p className="text-sm text-gray-400">
+                  or click to upload a photo to edit
+                </p>
+              )}
             </div>
           </>
         )}

@@ -16,6 +16,7 @@ export default function Home() {
   const [rateLimitInfo, setRateLimitInfo] = useState<any>(null);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [sessionStarted, setSessionStarted] = useState(false);
 
   const handleImageGenerate = async (prompt: string) => {
     try {
@@ -129,6 +130,10 @@ export default function Home() {
     setUploadError(error);
   }, []);
 
+  const handleSessionStart = useCallback(() => {
+    setSessionStarted(true);
+  }, []);
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Compact Header */}
@@ -204,13 +209,22 @@ export default function Home() {
                   onClear={handleClear}
                   centered={true}
                 />
-              ) : (
+              ) : sessionStarted ? (
                 <ImageUploader
                   sessionId={sessionId}
                   onUpload={handleImageUpload}
                   onError={handleUploadError}
                   disabled={isLoading}
                   placeholder={true}
+                />
+              ) : (
+                <ImageUploader
+                  sessionId={sessionId}
+                  onUpload={handleImageUpload}
+                  onError={handleUploadError}
+                  disabled={true}
+                  placeholder={true}
+                  inactiveMessage="Click Start Creating to upload a photo"
                 />
               )}
             </div>
@@ -223,6 +237,7 @@ export default function Home() {
                 currentImage={currentImage}
                 onListeningChange={setIsListening}
                 ultraCompact={true}
+                onSessionStart={handleSessionStart}
               />
 
               

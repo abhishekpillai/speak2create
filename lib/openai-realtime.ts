@@ -204,6 +204,21 @@ export class RealtimeClient {
     this.dc.send(JSON.stringify({ type: 'response.create' }));
   }
 
+  sendContext(text: string) {
+    if (!this.dc || this.dc.readyState !== 'open') return;
+
+    const event = {
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'system',
+        content: [{ type: 'input_text', text }]
+      }
+    };
+
+    this.dc.send(JSON.stringify(event));
+  }
+
   setOnMessage(handler: (event: any) => void) {
     this.onMessage = handler;
   }
