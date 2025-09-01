@@ -225,18 +225,6 @@ export default function Home() {
                 ultraCompact={true}
               />
 
-              {/* Upload New Button - Show when image exists */}
-              {currentImage && (
-                <div className="mt-3 flex justify-center">
-                  <ImageUploader
-                    sessionId={sessionId}
-                    onUpload={handleImageUpload}
-                    onError={handleUploadError}
-                    disabled={isLoading}
-                    compact={true}
-                  />
-                </div>
-              )}
               
               {/* Errors */}
               {(uploadError || rateLimitError) && (
