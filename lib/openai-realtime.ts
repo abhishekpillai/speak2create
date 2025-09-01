@@ -126,10 +126,27 @@ export class RealtimeClient {
     this.dc.send(JSON.stringify(updateEvent));
   }
 
+  private triggerGreeting() {
+    if (!this.dc || this.dc.readyState !== 'open') return;
+
+    console.log('Triggering initial greeting response');
+    const greetingTrigger = {
+      type: 'response.create'
+    };
+
+    this.dc.send(JSON.stringify(greetingTrigger));
+  }
+
   private handleEvent(event: any) {
     console.log('Received event:', event.type);
 
     switch (event.type) {
+      case 'session.created':
+      case 'session.updated':
+        console.log('Session established, triggering greeting');
+        this.triggerGreeting();
+        break;
+
       case 'response.function_call_arguments.done':
         this.handleFunctionCall(event);
         break;
@@ -177,7 +194,7 @@ export class RealtimeClient {
       item: {
         type: 'message',
         role: 'user',
-        content: [{ type: 'text', text }]
+        content: [{ type: 'input_text', text }]
       }
     };
 
@@ -185,6 +202,21 @@ export class RealtimeClient {
     
     // Request response
     this.dc.send(JSON.stringify({ type: 'response.create' }));
+  }
+
+  sendContext(text: string) {
+    if (!this.dc || this.dc.readyState !== 'open') return;
+
+    const event = {
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'system',
+        content: [{ type: 'input_text', text }]
+      }
+    };
+
+    this.dc.send(JSON.stringify(event));
   }
 
   setOnMessage(handler: (event: any) => void) {

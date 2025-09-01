@@ -7,19 +7,23 @@ import { RealtimeClient } from '@/lib/openai-realtime';
 interface VoiceControlProps {
   onImageGenerate: (prompt: string) => Promise<void>;
   onImageEdit: (instruction: string) => Promise<void>;
+  onMemeGenerate: (template: string, topText?: string, bottomText?: string) => Promise<void>;
   currentImage: string | null;
   onListeningChange?: (isListening: boolean) => void;
   compact?: boolean;
   ultraCompact?: boolean;
+  onSessionStart?: () => void;
 }
 
-export default function VoiceControl({ 
-  onImageGenerate, 
-  onImageEdit, 
+export default function VoiceControl({
+  onImageGenerate,
+  onImageEdit,
+  onMemeGenerate,
   currentImage,
   onListeningChange,
   compact = false,
-  ultraCompact = false
+  ultraCompact = false,
+  onSessionStart
 }: VoiceControlProps) {
   const [isListening, setIsListening] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -77,19 +81,37 @@ export default function VoiceControl({
   // Add a ref to track current image state for the realtime client
   const currentImageRef = useRef(currentImage);
   useEffect(() => {
+    const previousImage = currentImageRef.current;
     currentImageRef.current = currentImage;
     console.log('🖼️ currentImage updated in VoiceControl:', !!currentImage);
-  }, [currentImage]);
+    
+    // Send context update to AI when image state changes
+    if (clientRef.current && sessionActive) {
+      if (!previousImage && currentImage) {
+        // Image was uploaded/generated
+        console.log('📤 Sending context: Image now available');
+        clientRef.current.sendContext('Context update: An image is now displayed on screen and available for editing.');
+      } else if (previousImage && !currentImage) {
+        // Image was cleared
+        console.log('📤 Sending context: Image cleared');
+        clientRef.current.sendContext('Context update: No image is currently displayed on screen.');
+      }
+    }
+  }, [currentImage, sessionActive]);
 
   // Refs to always use the latest callbacks in realtime handlers
   const onImageEditRef = useRef(onImageEdit);
   const onImageGenerateRef = useRef(onImageGenerate);
+  const onMemeGenerateRef = useRef(onMemeGenerate);
   useEffect(() => {
     onImageEditRef.current = onImageEdit;
   }, [onImageEdit]);
   useEffect(() => {
     onImageGenerateRef.current = onImageGenerate;
   }, [onImageGenerate]);
+  useEffect(() => {
+    onMemeGenerateRef.current = onMemeGenerate;
+  }, [onMemeGenerate]);
 
   useEffect(() => {
     if (onListeningChange) {
@@ -198,27 +220,61 @@ export default function VoiceControl({
       // Initialize realtime client
       const client = new RealtimeClient({
         voice: 'alloy',
-        instructions: `You are a voice-controlled image creation assistant. Images appear instantly on the user's screen when you use functions.
+        instructions: `You are a voice-controlled image and meme creation assistant. Images appear instantly on the user's screen when you use functions.
+
+Start by greeting the user warmly and asking what they'd like to create.
+
+You will receive context updates telling you when images are available or cleared. Pay attention to these updates to make correct function choices.
 
 CRITICAL DECISION LOGIC:
-- If NO image exists on screen: Any descriptive request should call generate_image (e.g., "a sunset", "cute cat", "mountain landscape")
-- If an image EXISTS on screen: 
-  * Modification requests should call edit_image (e.g., "make it brighter", "add clouds", "change to night", "remove the tree")
-  * Requests starting with "new", "create", "generate", "start over", "different" should call generate_image for a fresh image
-  
+- MEME REQUESTS: If user mentions memes or asks for popular meme formats, use create_meme (e.g., "Drake meme", "distracted boyfriend", "woman yelling at cat")
+- When NO image is on screen: Regular descriptive requests use generate_image (e.g., "a sunset", "cute cat", "mountain landscape")
+- When an image IS on screen: 
+  * Modification requests use edit_image (e.g., "make it brighter", "add clouds", "change to night", "remove the tree")
+  * Requests starting with "new", "create", "generate", "start over", "different" use appropriate function for fresh content
+
+MEME RECOGNITION:
+- Popular formats: Drake, distracted boyfriend, woman yelling at cat, expanding brain, two buttons, disaster girl, success kid
+- Listen for: "meme", "[template name] meme", "make it a meme", "use the [description] format"
+- Parse text from context: "Drake meme about coffee vs tea" = top: coffee, bottom: tea
+
 RESPONSE STYLE:
-- When generating: Say "Creating your [brief description]..." then call function
-- When editing: Say "Making those changes..." or "Adjusting the [what you're changing]..." then call function  
+- When creating memes: Say "Creating your [template] meme..." then call create_meme
+- When generating: Say "Creating your [brief description]..." then call generate_image  
+- When editing: Say "Making those changes..." or "Adjusting the [what you're changing]..." then call edit_image
 - After function calls: Simple confirmation like "Done!" or "There you go!"
 - NEVER describe the image - they can see it
 - Keep all responses under 5 words when possible
 
 EXAMPLES:
+User: "Create a Drake meme about coffee versus energy drinks" → You: "Creating your Drake meme..." [create_meme template="drake", topText="Coffee", bottomText="Energy drinks"]
+User: "Make a distracted boyfriend meme" → You: "Creating your distracted boyfriend meme..." [create_meme template="distracted boyfriend"]
 User: "A cute robot in a garden" → You: "Creating your robot scene..." [generate_image]
-User: "Make the sky purple" (with image showing) → You: "Making the sky purple..." [edit_image]  
-User: "Actually, start over with a beach scene" → You: "Creating a beach scene..." [generate_image]
-User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..." [edit_image]`,
+User: "Make the sky purple" (with image showing) → You: "Making the sky purple..." [edit_image]`,
         tools: [
+          {
+            type: 'function',
+            name: 'create_meme',
+            description: 'Create a meme using popular meme templates. Use when user requests memes or specific meme formats.',
+            parameters: {
+              type: 'object',
+              properties: {
+                template: {
+                  type: 'string',
+                  description: 'Meme template name (e.g., "drake", "distracted boyfriend", "woman yelling at cat")'
+                },
+                topText: {
+                  type: 'string',
+                  description: 'Text for the top panel/section of the meme'
+                },
+                bottomText: {
+                  type: 'string',
+                  description: 'Text for the bottom panel/section of the meme'
+                }
+              },
+              required: ['template']
+            }
+          },
           {
             type: 'function',
             name: 'generate_image',
@@ -267,7 +323,13 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
         const hasImage = !!currentImageRef.current;
         console.log('🔧 Function call received:', { name, args, currentImage: hasImage });
 
-        if (name === 'generate_image') {
+        if (name === 'create_meme') {
+          console.log('😂 Calling create_meme with:', args);
+          setStatus('Creating meme...');
+          await onMemeGenerateRef.current(args.template, args.topText, args.bottomText);
+          setStatus('Meme created!');
+          return { success: true };
+        } else if (name === 'generate_image') {
           console.log('🎨 Calling generate_image with prompt:', args.prompt);
           setStatus('Generating image...');
           await onImageGenerateRef.current(args.prompt);
@@ -305,15 +367,15 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       setIsListening(true);
       setIsConnecting(false);
       setStatus('Listening... Speak your command');
-
-      // Greet the user
-      client.sendText('Please welcome the user and ask them what they would like to create.');
+      if (onSessionStart) {
+        onSessionStart();
+      }
     } catch (error) {
       console.error('Failed to start listening:', error);
       setStatus('Failed to connect. Please try again.');
       setIsConnecting(false);
     }
-  }, [onImageEdit, onImageGenerate, currentImage]);
+  }, [onImageEdit, onImageGenerate, onMemeGenerate, currentImage, onSessionStart]);
 
   const mute = () => {
     localStreamRef.current?.getAudioTracks().forEach(track => (track.enabled = false));
@@ -474,6 +536,9 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
         <div className="mt-4 flex flex-wrap gap-2">
           <span className="text-xs text-gray-500">Try saying:</span>
           <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+            "Create a Drake meme"
+          </button>
+          <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
             "Generate a sunset over mountains"
           </button>
           <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
@@ -565,6 +630,8 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
         <div className="mt-6 p-4 bg-purple-50 rounded-lg">
           <p className="text-sm font-semibold text-purple-900 mb-2">Try saying:</p>
           <ul className="text-sm text-purple-700 space-y-1">
+            <li>• "Create a Drake meme about coffee"</li>
+            <li>• "Make a distracted boyfriend meme"</li>
             <li>• "Generate a sunset over mountains"</li>
             <li>• "Create a cute robot in a garden"</li>
             {currentImage && (

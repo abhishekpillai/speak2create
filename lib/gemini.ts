@@ -15,6 +15,7 @@ export interface ImageGenerationResponse {
 export interface ImageEditRequest {
   imageId: string;
   imageData: string;
+  mimeType: string;
   editInstruction: string;
   sessionId: string;
 }
@@ -72,7 +73,7 @@ export class GeminiClient {
         request.editInstruction,
         {
           inlineData: {
-            mimeType: 'image/png',
+            mimeType: request.mimeType,
             data: request.imageData.replace(/^data:image\/\w+;base64,/, '')
           }
         }
