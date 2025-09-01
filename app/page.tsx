@@ -133,7 +133,7 @@ export default function Home() {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Compact Header */}
       <header className="bg-white border-b border-gray-100 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-1 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-black rounded-lg">
               <Sparkles className="w-4 h-4 text-white" />
@@ -149,7 +149,7 @@ export default function Home() {
       </header>
 
       {/* Main Content - Centered Stack */}
-      <main className="flex-1 flex items-center justify-center p-4 py-8 min-h-0">
+      <main className="flex-1 flex items-center justify-center p-4 py-4 min-h-0">
         <div className="w-full max-w-6xl flex gap-8 items-center">
           {/* Left Side - Try Saying Tips */}
           <div className="hidden lg:block w-48 flex-shrink-0">
@@ -184,11 +184,11 @@ export default function Home() {
           {/* Center - Main Content */}
           <div className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto">
             {/* Title */}
-            <div className="text-center mb-4 mt-4">
-              <h2 className="text-4xl font-semibold text-gray-900 mb-2">
+            <div className="text-center mb-2">
+              <h2 className="text-3xl font-semibold text-gray-900 mb-1">
                 {currentImage ? "Your Creation" : "Speak Your Vision"}
               </h2>
-              <p className="text-base text-gray-500">
+              <p className="text-sm text-gray-500">
                 {currentImage
                   ? (uploadedImageId ? "Edit your photo with voice commands" : "Edit with voice or save your masterpiece")
                   : "Just describe what you want to see"}
@@ -196,7 +196,7 @@ export default function Home() {
             </div>
 
             {/* Image Display with Upload Option - Smaller, Centered */}
-            <div className="w-full max-w-xl mb-6">
+            <div className="w-full max-w-md mb-3">
               {currentImage ? (
                 <ImageDisplay
                   imageUrl={currentImage}
@@ -307,7 +307,7 @@ export default function Home() {
       </main>
 
       {/* Footer with attribution */}
-      <footer className="bg-white border-t border-gray-100 py-3 px-4 flex-shrink-0">
+      <footer className="bg-white border-t border-gray-100 py-2 px-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <span>Powered by</span>

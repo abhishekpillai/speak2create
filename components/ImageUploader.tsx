@@ -169,7 +169,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
     return (
       <div
         className={`
-          aspect-square bg-gray-50 border-2 border-gray-200 rounded-lg flex flex-col items-center justify-center p-8 min-h-[300px] transition-all duration-200
+          aspect-square bg-gray-50 border-2 border-gray-200 rounded-lg flex flex-col items-center justify-center p-6 transition-all duration-200
           ${isDragOver ? 'border-blue-400 bg-blue-50' : 'hover:border-gray-300 hover:bg-gray-100'}
           ${disabled || isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
