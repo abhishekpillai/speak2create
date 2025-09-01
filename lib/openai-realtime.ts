@@ -177,7 +177,7 @@ export class RealtimeClient {
       item: {
         type: 'message',
         role: 'user',
-        content: [{ type: 'text', text }]
+        content: [{ type: 'input_text', text }]
       }
     };
 
