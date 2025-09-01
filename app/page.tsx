@@ -5,6 +5,7 @@ import VoiceControl from "@/components/VoiceControl";
 import ImageDisplay from "@/components/ImageDisplay";
 import UsageLimits from "@/components/UsageLimits";
 import { Sparkles } from "lucide-react";
+import addWatermark from "@/lib/watermark";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -40,7 +41,13 @@ export default function Home() {
         return;
       }
 
-      setCurrentImage(data.imageUrl);
+      let imageUrl = data.imageUrl;
+      try {
+        imageUrl = await addWatermark(data.imageUrl);
+      } catch (err) {
+        console.error("Watermark failed:", err);
+      }
+      setCurrentImage(imageUrl);
       setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
       console.error("Image generation error:", error);
@@ -85,7 +92,13 @@ export default function Home() {
       }
 
       console.log('✅ Edit successful, updating image');
-      setCurrentImage(data.imageUrl);
+      let imageUrl = data.imageUrl;
+      try {
+        imageUrl = await addWatermark(data.imageUrl);
+      } catch (err) {
+        console.error('Watermark failed:', err);
+      }
+      setCurrentImage(imageUrl);
       setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
       console.error('❌ Image editing error:', error);
