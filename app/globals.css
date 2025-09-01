@@ -14,6 +14,8 @@
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
+    /* Use dynamic viewport height on supported browsers to better handle mobile UI */
+    min-height: 100dvh;
   }
 }
 
@@ -29,5 +31,14 @@
 
   .animate-pulse-glow {
     animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Safe area helpers for mobile devices with notches */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }

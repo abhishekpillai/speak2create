@@ -174,9 +174,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="min-h-[100dvh] flex flex-col bg-gray-50 overflow-x-hidden">
       {/* Compact Header */}
-      <header className="bg-white border-b border-gray-100 flex-shrink-0">
+      <header className="bg-white border-b border-gray-100 flex-shrink-0 pt-safe">
         <div className="max-w-7xl mx-auto px-4 py-1 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-black rounded-lg">
@@ -193,7 +193,7 @@ export default function Home() {
       </header>
 
       {/* Main Content - Centered Stack */}
-      <main className="flex-1 flex items-center justify-center p-4 py-4 min-h-0">
+      <main className="flex-1 flex items-center justify-center p-4 py-4 min-h-0 overflow-y-auto">
         <div className="w-full max-w-6xl flex gap-8 items-center">
           {/* Left Side - Try Saying Tips */}
           <div className="hidden lg:block w-48 flex-shrink-0">
@@ -368,7 +368,7 @@ export default function Home() {
       </main>
 
       {/* Footer with attribution */}
-      <footer className="bg-white border-t border-gray-100 py-2 px-4 flex-shrink-0">
+      <footer className="bg-white border-t border-gray-100 py-2 px-4 flex-shrink-0 pb-safe">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <span>Powered by</span>
