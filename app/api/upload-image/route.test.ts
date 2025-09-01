@@ -17,9 +17,33 @@ vi.mock('image-size', () => ({
   imageSize,
 }));
 
+// Mock rate limiting
+const checkIPRateLimit = vi.fn();
+const getClientIP = vi.fn();
+vi.mock('@/lib/rate-limit', () => ({
+  checkIPRateLimit,
+  getClientIP,
+}));
+
+// Mock constants
+vi.mock('@/lib/constants', () => ({
+  RATE_LIMIT_ERRORS: {
+    IP_LIMIT_EXCEEDED: 'IP rate limit exceeded'
+  }
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.resetModules();
+  
+  // Set default successful rate limiting
+  checkIPRateLimit.mockResolvedValue({
+    success: true,
+    limit: 5,
+    remaining: 4,
+    reset: new Date(Date.now() + 3600000)
+  });
+  getClientIP.mockReturnValue('127.0.0.1');
 });
 
 describe('POST /api/upload-image', () => {
@@ -92,6 +116,34 @@ describe('POST /api/upload-image', () => {
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error).toBe('Image too large (max 5MB). Please resize and try again.');
+  });
+
+  it('returns 429 when IP rate limit exceeded', async () => {
+    const { POST } = await import('./route');
+    
+    // Mock rate limit exceeded
+    checkIPRateLimit.mockResolvedValueOnce({
+      success: false,
+      limit: 5,
+      remaining: 0,
+      reset: new Date(Date.now() + 3600000)
+    });
+    
+    const formData = new FormData();
+    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    formData.append('file', file);
+    formData.append('session_id', 's1');
+    
+    const req = new NextRequest('http://localhost', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    const res = await POST(req as any);
+    expect(res.status).toBe(429);
+    const data = await res.json();
+    expect(data.error).toBe('Rate limit exceeded');
+    expect(data.message).toBe('IP rate limit exceeded');
   });
 
   it('returns 400 when session image limit reached', async () => {

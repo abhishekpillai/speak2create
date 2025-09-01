@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sessionImageStore } from '@/lib/image-store';
 import { imageSize } from 'image-size';
+import { checkIPRateLimit, getClientIP } from '@/lib/rate-limit';
+import { RATE_LIMIT_ERRORS } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
+    // Get client IP for rate limiting
+    const clientIP = getClientIP(request);
+
+    // Check IP-based rate limit (5 generations per hour) - same as generate endpoint
+    const ipRateLimit = await checkIPRateLimit(clientIP);
+    if (!ipRateLimit.success) {
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded',
+          message: RATE_LIMIT_ERRORS.IP_LIMIT_EXCEEDED,
+          rateLimitInfo: {
+            limit: ipRateLimit.limit,
+            remaining: ipRateLimit.remaining,
+            resetTime: ipRateLimit.reset,
+          }
+        },
+        { status: 429 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const sessionId = formData.get('session_id') as string | null;
