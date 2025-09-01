@@ -224,7 +224,7 @@ export default function Home() {
                   onError={handleUploadError}
                   disabled={true}
                   placeholder={true}
-                  inactiveMessage="Click Start Creating to upload a photo"
+                  inactiveMessage="Click Start Creating to begin"
                 />
               )}
             </div>
