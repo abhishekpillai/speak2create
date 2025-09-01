@@ -191,11 +191,11 @@ export default function Home() {
               <p className="text-base text-gray-500">
                 {currentImage
                   ? (uploadedImageId ? "Edit your photo with voice commands" : "Edit with voice or save your masterpiece")
-                  : "Upload a photo to edit or describe what you want to create"}
+                  : "Just describe what you want to see"}
               </p>
             </div>
 
-            {/* Image Display or Upload - Smaller, Centered */}
+            {/* Image Display with Upload Option - Smaller, Centered */}
             <div className="w-full max-w-xl mb-6">
               {currentImage ? (
                 <ImageDisplay
@@ -210,6 +210,7 @@ export default function Home() {
                   onUpload={handleImageUpload}
                   onError={handleUploadError}
                   disabled={isLoading}
+                  placeholder={true}
                 />
               )}
             </div>

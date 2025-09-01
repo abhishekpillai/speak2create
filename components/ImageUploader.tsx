@@ -23,9 +23,11 @@ interface ImageUploaderProps {
   onError: (error: string) => void;
   disabled?: boolean;
   compact?: boolean; // For showing as a smaller button when image exists
+  overlay?: boolean; // For showing as an overlay on the placeholder
+  placeholder?: boolean; // For showing as the main placeholder area
 }
 
-export default function ImageUploader({ sessionId, onUpload, onError, disabled = false, compact = false }: ImageUploaderProps) {
+export default function ImageUploader({ sessionId, onUpload, onError, disabled = false, compact = false, overlay = false, placeholder = false }: ImageUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -157,6 +159,96 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
           <>
             <Upload className="w-4 h-4" />
             Upload New
+          </>
+        )}
+      </button>
+    );
+  }
+
+  if (placeholder) {
+    return (
+      <div
+        className={`
+          aspect-square bg-gray-50 border-2 border-gray-200 rounded-lg flex flex-col items-center justify-center p-8 min-h-[300px] transition-all duration-200
+          ${isDragOver ? 'border-blue-400 bg-blue-50' : 'hover:border-gray-300 hover:bg-gray-100'}
+          ${disabled || isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        `}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleClick}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileSelect}
+          disabled={disabled || isUploading}
+        />
+        
+        {isUploading ? (
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            <div className="w-full max-w-xs">
+              <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-blue-600 h-full transition-all duration-200 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-sm text-gray-600 mt-2 text-center">Uploading... {uploadProgress}%</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-500 mb-1">
+                Your image will appear here
+              </p>
+              <p className="text-sm text-gray-400">
+                or click to upload a photo to edit
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  if (overlay) {
+    return (
+      <button
+        className={`
+          inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-black bg-opacity-75 rounded-lg
+          hover:bg-opacity-90 transition-all duration-200 backdrop-blur-sm
+          ${disabled || isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        `}
+        onClick={handleClick}
+        disabled={disabled || isUploading}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileSelect}
+          disabled={disabled || isUploading}
+        />
+        {isUploading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="w-4 h-4" />
+            Click to Upload
           </>
         )}
       </button>
