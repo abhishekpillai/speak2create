@@ -29,7 +29,6 @@
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "happy-dom": "^18.0.1",
-    "jsdom": "^26.1.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5",
