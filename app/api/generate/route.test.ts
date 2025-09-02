@@ -69,6 +69,22 @@ describe('POST /api/generate', () => {
     expect(incrementSessionUsage).toHaveBeenCalledWith('s1');
   });
 
+  it('skips rate limiting when VIP cookie present', async () => {
+    process.env.VIP_SECRETS = 'secret1,secret2';
+    generateImage.mockResolvedValueOnce({ imageUrl: 'url', imageId: 'img', processedPrompt: 'p' });
+    const { POST } = await import('./route');
+    const req = new NextRequest('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: 'test', session_id: 's1' }),
+      headers: { 'content-type': 'application/json', cookie: 'vip=secret1' },
+    });
+    const res = await POST(req as any);
+    expect(res.status).toBe(200);
+    expect(checkIPRateLimit).not.toHaveBeenCalled();
+    expect(checkSessionLimit).not.toHaveBeenCalled();
+    delete process.env.VIP_SECRETS;
+  });
+
   it('returns 500 when API key missing', async () => {
     delete process.env.GOOGLE_GEMINI_API_KEY;
     const { POST } = await import('./route');

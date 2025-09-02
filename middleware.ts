@@ -44,6 +44,26 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  // VIP secret handling - bypass rate limits when valid code is present
+  const vipSecrets = (process.env.VIP_SECRETS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const vipParam = request.nextUrl.searchParams.get('vip');
+  const vipCookie = request.cookies.get('vip')?.value;
+  if (vipParam && vipSecrets.includes(vipParam)) {
+    const response = NextResponse.next();
+    response.cookies.set('vip', vipParam, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+    return response;
+  }
+  if (vipCookie && vipSecrets.includes(vipCookie)) {
+    return NextResponse.next();
+  }
+
   // Only apply rate limiting to API routes
   if (!request.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next();
