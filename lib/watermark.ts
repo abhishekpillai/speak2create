@@ -17,7 +17,7 @@ export default async function addWatermark(imageUrl: string): Promise<string> {
       ctx.textAlign = "right";
       ctx.textBaseline = "bottom";
       ctx.fillStyle = "rgba(255,255,255,0.5)";
-      const text = "speak2createai.com";
+      const text = "speak2createai";
       ctx.fillText(text, img.width - 10, img.height - 10);
       resolve(canvas.toDataURL());
     };
