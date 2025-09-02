@@ -52,7 +52,12 @@ export async function middleware(request: NextRequest) {
   const vipParam = request.nextUrl.searchParams.get('vip');
   const vipCookie = request.cookies.get('vip')?.value;
   if (vipParam && vipSecrets.includes(vipParam)) {
-    const response = NextResponse.next();
+    // Clone the URL and remove the vip parameter to prevent exposure
+    const url = request.nextUrl.clone();
+    url.searchParams.delete('vip');
+    
+    // Create redirect response with cookie
+    const response = NextResponse.redirect(url);
     response.cookies.set('vip', vipParam, {
       httpOnly: true,
       sameSite: 'lax',
