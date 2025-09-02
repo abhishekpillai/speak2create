@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Image file and session_id are required' }, { status: 400 });
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Please upload JPG, PNG, or WebP files.' }, { status: 400 });
+      return NextResponse.json({ error: 'Please upload JPG, PNG, WebP, or HEIC files.' }, { status: 400 });
     }
 
     if (file.size > 5 * 1024 * 1024) {
@@ -45,12 +45,18 @@ export async function POST(request: NextRequest) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const dimensions = imageSize(buffer);
+
+    let dimensions: any;
+    try {
+      dimensions = imageSize(buffer);
+    } catch {
+      dimensions = { width: 0, height: 0, type: file.type.split('/')[1] };
+    }
 
     const metadata = {
       width: dimensions.width || 0,
       height: dimensions.height || 0,
-      format: dimensions.type || 'unknown',
+      format: dimensions.type || file.type.split('/')[1] || 'unknown',
     };
 
     let imageId: string;
