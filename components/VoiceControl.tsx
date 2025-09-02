@@ -213,9 +213,45 @@ export default function VoiceControl({
       setIsConnecting(true);
       setStatus('Connecting...');
 
-      // Get session token
-      const response = await fetch('/api/session', { method: 'POST' });
-      const { token } = await response.json();
+      // Step 1: Get session initiation token
+      const initResponse = await fetch('/api/session-init', { method: 'POST' });
+      
+      if (!initResponse.ok) {
+        const error = await initResponse.json();
+        if (initResponse.status === 429) {
+          setStatus(error.message || 'Too many session requests. Please wait a moment.');
+          setIsConnecting(false);
+          return;
+        }
+        throw new Error(error.error || 'Failed to initiate session');
+      }
+      
+      const { initToken } = await initResponse.json();
+
+      // Step 2: Get OpenAI session token using the init token
+      const response = await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initToken })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        if (response.status === 429) {
+          setStatus(error.message || 'Session limit reached. Please wait before starting a new session.');
+          setIsConnecting(false);
+          return;
+        }
+        if (response.status === 401) {
+          setStatus('Session authentication failed. Please try again.');
+          setIsConnecting(false);
+          return;
+        }
+        throw new Error(error.error || 'Failed to create session');
+      }
+      
+      const { token, session_id } = await response.json();
+      console.log('Session created with ID:', session_id);
 
       // Initialize realtime client
       const client = new RealtimeClient({

@@ -21,6 +21,18 @@ export const apiRequestLimiter = new Ratelimit({
   analytics: true,
 });
 
+export const sessionCreationLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(RATE_LIMITS.SESSION_CREATIONS_PER_HOUR, '1 h'),
+  analytics: true,
+});
+
+export const sessionInitLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(RATE_LIMITS.SESSION_INIT_PER_5MIN, '5 m'),
+  analytics: true,
+});
+
 export interface UsageInfo {
   remainingGenerations: number;
   resetTime: Date;
@@ -193,6 +205,54 @@ export async function getUsageInfo(ip: string, sessionId: string): Promise<Usage
     sessionImagesRemaining: sessionLimit.imagesRemaining,
     sessionResetTime: sessionLimit.resetTime,
   };
+}
+
+export async function checkSessionCreationRateLimit(ip: string): Promise<RateLimitResult> {
+  try {
+    const { success, limit, remaining, reset } = await sessionCreationLimiter.limit(ip);
+    
+    return {
+      success,
+      limit,
+      remaining,
+      reset: new Date(reset),
+      error: success ? undefined : 'Session creation rate limit exceeded'
+    };
+  } catch (error) {
+    console.error('Session creation rate limit check failed:', error);
+    // Fail closed for security - prevent unlimited session creation
+    return {
+      success: false,
+      limit: RATE_LIMITS.SESSION_CREATIONS_PER_HOUR,
+      remaining: 0,
+      reset: new Date(Date.now() + 60 * 60 * 1000),
+      error: 'Rate limiting service unavailable'
+    };
+  }
+}
+
+export async function checkSessionInitRateLimit(ip: string): Promise<RateLimitResult> {
+  try {
+    const { success, limit, remaining, reset } = await sessionInitLimiter.limit(ip);
+    
+    return {
+      success,
+      limit,
+      remaining,
+      reset: new Date(reset),
+      error: success ? undefined : 'Session init rate limit exceeded'
+    };
+  } catch (error) {
+    console.error('Session init rate limit check failed:', error);
+    // Fail closed for security - prevent abuse
+    return {
+      success: false,
+      limit: RATE_LIMITS.SESSION_INIT_PER_5MIN,
+      remaining: 0,
+      reset: new Date(Date.now() + 5 * 60 * 1000),
+      error: 'Rate limiting service unavailable'
+    };
+  }
 }
 
 export function getClientIP(request: Request): string {

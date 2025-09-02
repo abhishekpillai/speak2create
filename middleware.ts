@@ -74,8 +74,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip rate limiting for session endpoint (needed for auth)
-  if (request.nextUrl.pathname === '/api/session') {
+  // Skip general rate limiting for session endpoints (they have their own rate limiting)
+  if (request.nextUrl.pathname === '/api/session' || 
+      request.nextUrl.pathname === '/api/session-init') {
     return NextResponse.next();
   }
 
