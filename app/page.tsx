@@ -6,9 +6,11 @@ import ImageDisplay from "@/components/ImageDisplay";
 import ImageUploader from "@/components/ImageUploader";
 import UsageLimits from "@/components/UsageLimits";
 import { Sparkles } from "lucide-react";
+import addWatermark from "@/lib/watermark";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [uploadedImageId, setUploadedImageId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -44,7 +46,17 @@ export default function Home() {
         return;
       }
 
-      setCurrentImage(data.imageUrl);
+      // Store original unwatermarked image
+      setOriginalImage(data.imageUrl);
+      
+      // Create watermarked version for display
+      let watermarkedUrl = data.imageUrl;
+      try {
+        watermarkedUrl = await addWatermark(data.imageUrl);
+      } catch (err) {
+        console.error("Watermark failed:", err);
+      }
+      setCurrentImage(watermarkedUrl);
       setUploadedImageId(null); // Clear uploaded image when generating new one
       setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
@@ -83,7 +95,17 @@ export default function Home() {
         return;
       }
 
-      setCurrentImage(data.imageUrl);
+      // Store original unwatermarked meme
+      setOriginalImage(data.imageUrl);
+      
+      // Create watermarked version for display
+      let watermarkedUrl = data.imageUrl;
+      try {
+        watermarkedUrl = await addWatermark(data.imageUrl);
+      } catch (err) {
+        console.error("Watermark failed:", err);
+      }
+      setCurrentImage(watermarkedUrl);
       setUploadedImageId(null); // Clear uploaded image when generating new meme
       setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
@@ -95,9 +117,9 @@ export default function Home() {
   };
 
   const handleImageEdit = useCallback(async (instruction: string) => {
-    console.log('📝 handleImageEdit called with:', { instruction, hasImage: !!currentImage, hasUploadedImage: !!uploadedImageId });
-    if (!currentImage) {
-      console.warn('⚠️ handleImageEdit called but no current image');
+    console.log('📝 handleImageEdit called with:', { instruction, hasOriginalImage: !!originalImage, hasUploadedImage: !!uploadedImageId });
+    if (!originalImage && !uploadedImageId) {
+      console.warn('⚠️ handleImageEdit called but no original image or uploaded image');
       return;
     }
 
@@ -114,7 +136,7 @@ export default function Home() {
             session_id: sessionId,
           }
         : {
-            image_data: currentImage,
+            image_data: originalImage,
             edit_instruction: instruction,
             session_id: sessionId,
           };
@@ -138,7 +160,18 @@ export default function Home() {
       }
 
       console.log('✅ Edit successful, updating image');
-      setCurrentImage(data.imageUrl);
+      
+      // Store original unwatermarked edited image
+      setOriginalImage(data.imageUrl);
+      
+      // Create watermarked version for display
+      let watermarkedUrl = data.imageUrl;
+      try {
+        watermarkedUrl = await addWatermark(data.imageUrl);
+      } catch (err) {
+        console.error('Watermark failed:', err);
+      }
+      setCurrentImage(watermarkedUrl);
       setRateLimitInfo(data.rateLimitInfo);
     } catch (error) {
       console.error('❌ Image editing error:', error);
@@ -147,15 +180,17 @@ export default function Home() {
       console.log('🔄 Edit complete, setting loading to false');
       setIsLoading(false);
     }
-  }, [currentImage, uploadedImageId, sessionId]);
+  }, [originalImage, uploadedImageId, sessionId]);
 
   const handleClear = () => {
     setCurrentImage(null);
+    setOriginalImage(null);
     setUploadedImageId(null);
   };
 
   const handleImageUpload = useCallback((result: any) => {
     setCurrentImage(result.image_url);
+    setOriginalImage(null); // Clear original image when uploading new image
     setUploadedImageId(result.image_id);
     setUploadError(null);
     setRateLimitError(null);
