@@ -405,15 +405,13 @@ export default function Home() {
       {/* Footer with attribution */}
       <footer className="bg-white border-t border-gray-100 py-2 px-4 flex-shrink-0 pb-safe">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
-          <div className="flex items-center gap-1">
+          <div className="flex flex-col sm:flex-row items-center gap-1">
             <span>Powered by</span>
-            <span className="font-medium text-gray-700">
-              OpenAI Realtime API
-            </span>
-            <span>&</span>
-            <span className="font-medium text-gray-700">
-              Google Gemini 2.5 Flash Image 🍌
-            </span>
+            <div className="flex flex-col sm:flex-row items-center gap-1">
+              <span className="font-medium text-gray-700">OpenAI Realtime API</span>
+              <span className="hidden sm:inline">&</span>
+              <span className="font-medium text-gray-700">Google Gemini 2.5 Flash Image 🍌</span>
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <span>Built by</span>
