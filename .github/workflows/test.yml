@@ -15,5 +15,6 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - run: npm install --force
+      - run: rm -rf node_modules package-lock.json
+      - run: npm install
       - run: npm test
