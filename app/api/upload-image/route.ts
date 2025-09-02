@@ -6,24 +6,33 @@ import { RATE_LIMIT_ERRORS } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
+    const vipSecrets = (process.env.VIP_SECRETS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    const vipCookie = request.cookies.get('vip')?.value;
+    const isVIP = vipCookie && vipSecrets.includes(vipCookie);
+
     // Get client IP for rate limiting
     const clientIP = getClientIP(request);
 
     // Check IP-based rate limit (5 generations per hour) - same as generate endpoint
-    const ipRateLimit = await checkIPRateLimit(clientIP);
-    if (!ipRateLimit.success) {
-      return NextResponse.json(
-        { 
-          error: 'Rate limit exceeded',
-          message: RATE_LIMIT_ERRORS.IP_LIMIT_EXCEEDED,
-          rateLimitInfo: {
-            limit: ipRateLimit.limit,
-            remaining: ipRateLimit.remaining,
-            resetTime: ipRateLimit.reset,
-          }
-        },
-        { status: 429 }
-      );
+    if (!isVIP) {
+      const ipRateLimit = await checkIPRateLimit(clientIP);
+      if (!ipRateLimit.success) {
+        return NextResponse.json(
+          {
+            error: 'Rate limit exceeded',
+            message: RATE_LIMIT_ERRORS.IP_LIMIT_EXCEEDED,
+            rateLimitInfo: {
+              limit: ipRateLimit.limit,
+              remaining: ipRateLimit.remaining,
+              resetTime: ipRateLimit.reset,
+            }
+          },
+          { status: 429 }
+        );
+      }
     }
 
     const formData = await request.formData();

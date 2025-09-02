@@ -45,6 +45,7 @@ Edit `.env.local` and add your API keys:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 GOOGLE_GEMINI_API_KEY=your_gemini_api_key_here
+VIP_SECRETS=secret1,secret2 # optional, comma-separated secrets for unlimited access
 ```
 
 4. Run the development server:
@@ -53,6 +54,12 @@ npm run dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### VIP Access
+
+To give certain users unlimited usage, set a comma-separated list of secrets in `VIP_SECRETS`.
+Share one of these codes and have the user visit the site with `?vip=the_code` appended to the URL.
+The code is stored in a cookie, bypassing rate limits for the rest of that session.
 
 ## Usage
 

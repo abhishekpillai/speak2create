@@ -61,43 +61,78 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const vipSecrets = (process.env.VIP_SECRETS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    const vipCookie = request.cookies.get('vip')?.value;
+    const isVIP = vipCookie && vipSecrets.includes(vipCookie);
+
     // Get client IP for rate limiting
     const clientIP = getClientIP(request);
 
-    // Check IP-based rate limit (5 generations per hour)
-    const ipRateLimit = await checkIPRateLimit(clientIP);
-    if (!ipRateLimit.success) {
-      return NextResponse.json(
-        { 
-          error: 'Rate limit exceeded',
-          message: RATE_LIMIT_ERRORS.IP_LIMIT_EXCEEDED,
-          rateLimitInfo: {
-            limit: ipRateLimit.limit,
-            remaining: ipRateLimit.remaining,
-            resetTime: ipRateLimit.reset,
-          }
-        },
-        { status: 429 }
-      );
+    if (!isVIP) {
+      // Check IP-based rate limit (5 generations per hour)
+      const ipRateLimit = await checkIPRateLimit(clientIP);
+      if (!ipRateLimit.success) {
+        return NextResponse.json(
+          {
+            error: 'Rate limit exceeded',
+            message: RATE_LIMIT_ERRORS.IP_LIMIT_EXCEEDED,
+            rateLimitInfo: {
+              limit: ipRateLimit.limit,
+              remaining: ipRateLimit.remaining,
+              resetTime: ipRateLimit.reset,
+            }
+          },
+          { status: 429 }
+        );
+      }
+
+      // Check session-based limit (3 images per 30 minutes)
+      const sessionLimit = await checkSessionLimit(session_id);
+      if (!sessionLimit.success) {
+        return NextResponse.json(
+          {
+            error: 'Session limit exceeded',
+            message: RATE_LIMIT_ERRORS.SESSION_LIMIT_EXCEEDED,
+            sessionInfo: {
+              imagesUsed: sessionLimit.imagesUsed,
+              imagesRemaining: sessionLimit.imagesRemaining,
+              resetTime: sessionLimit.resetTime,
+            }
+          },
+          { status: 429 }
+        );
+      }
+
+      console.log('🤖 Calling Gemini client editImage...');
+      const client = new GeminiClient(apiKey);
+      const result = await client.editImage({
+        imageId: base_image_id || 'generated_image',
+        imageData: finalImageData,
+        mimeType: mime,
+        editInstruction: edit_instruction,
+        sessionId: session_id
+      });
+
+      // Increment session usage after successful edit
+      await incrementSessionUsage(session_id);
+
+      console.log('✅ Edit successful, returning result');
+      return NextResponse.json({
+        ...result,
+        rateLimitInfo: {
+          ipRemaining: ipRateLimit.remaining - 1, // Subtract 1 since we just used one
+          ipResetTime: ipRateLimit.reset,
+          sessionImagesUsed: sessionLimit.imagesUsed + 1,
+          sessionImagesRemaining: sessionLimit.imagesRemaining - 1,
+          sessionResetTime: sessionLimit.resetTime,
+        }
+      });
     }
 
-    // Check session-based limit (3 images per 30 minutes)
-    const sessionLimit = await checkSessionLimit(session_id);
-    if (!sessionLimit.success) {
-      return NextResponse.json(
-        { 
-          error: 'Session limit exceeded',
-          message: RATE_LIMIT_ERRORS.SESSION_LIMIT_EXCEEDED,
-          sessionInfo: {
-            imagesUsed: sessionLimit.imagesUsed,
-            imagesRemaining: sessionLimit.imagesRemaining,
-            resetTime: sessionLimit.resetTime,
-          }
-        },
-        { status: 429 }
-      );
-    }
-
+    // VIP - skip rate limiting
     console.log('🤖 Calling Gemini client editImage...');
     const client = new GeminiClient(apiKey);
     const result = await client.editImage({
@@ -107,21 +142,8 @@ export async function POST(request: NextRequest) {
       editInstruction: edit_instruction,
       sessionId: session_id
     });
-
-    // Increment session usage after successful edit
-    await incrementSessionUsage(session_id);
-
     console.log('✅ Edit successful, returning result');
-    return NextResponse.json({
-      ...result,
-      rateLimitInfo: {
-        ipRemaining: ipRateLimit.remaining - 1, // Subtract 1 since we just used one
-        ipResetTime: ipRateLimit.reset,
-        sessionImagesUsed: sessionLimit.imagesUsed + 1,
-        sessionImagesRemaining: sessionLimit.imagesRemaining - 1,
-        sessionResetTime: sessionLimit.resetTime,
-      }
-    });
+    return NextResponse.json({ ...result, rateLimitInfo: { unlimited: true } });
   } catch (error) {
     console.error('❌ Image editing API error:', error);
     return NextResponse.json(
