@@ -121,6 +121,29 @@ This codebase has complex nested callback patterns that require careful state ma
 - Use descriptive test names that explain the scenario
 - Validate response status codes, headers, and body content
 
+## AI Prompting Documentation
+
+When updating AI prompts or system instructions, reference these comprehensive guides:
+
+**Gemini 2.5 Flash Image Prompting:**
+- `docs/gemini-flash-image-prompting-guide.md`: Official Google guide for optimal image generation prompts
+- Key principles: Describe scenes narratively vs keywords, specify camera angles/lighting for photorealism, mention artistic styles/mediums
+- Templates for photorealistic scenes, creative artwork, product shots, logos with text rendering
+- Best practices for iterative editing and multi-image composition
+
+**OpenAI Realtime API Prompting:**
+- `docs/openai-realtime-prompting-guide.md`: Official OpenAI guide for voice-to-voice system prompts
+- Voice-specific techniques: Response pacing, speech patterns, emotional tone control
+- Tool calling in conversational context, function preambles, sample phrases
+- State machine conversation flows, dynamic conversation management
+- Audio quality handling (background noise, unclear speech, interruptions)
+
+**Implementation Guidelines:**
+- Always consult both guides before modifying prompts in `VoiceControl.tsx` or `lib/gemini.ts`
+- Test prompt changes with diverse voice inputs and image generation scenarios
+- Maintain consistency between Realtime API instructions and Gemini prompt enhancement
+- Document any custom prompt patterns or successful optimizations in these guides
+
 ## Technology Stack
 
 - **Next.js 15.5** with App Router and TypeScript
