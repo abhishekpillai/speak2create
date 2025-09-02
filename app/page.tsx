@@ -279,7 +279,7 @@ export default function Home() {
 
             {/* Image Display with Upload Option - Smaller, Centered */}
             <div className="w-full max-w-md mb-3">
-              {currentImage ? (
+              {currentImage || isLoading ? (
                 <ImageDisplay
                   imageUrl={currentImage}
                   isLoading={isLoading}
