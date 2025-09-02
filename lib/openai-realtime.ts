@@ -118,7 +118,7 @@ export class RealtimeClient {
       session: {
         model: this.config.model,
         voice: this.config.voice,
-        instructions: this.config.instructions || 'You are a helpful assistant that helps users create images through natural conversation. When crafting prompts for Gemini 2.5 Flash Image, describe scenes in full sentences with subject, action, environment, lighting, camera details, style or medium, and aspect ratio. Use positive phrasing and specify exact text and fonts when needed. Choose generate_image for new images and edit_image for modifications.',
+        instructions: this.config.instructions || 'You are a helpful assistant that helps users create images through natural conversation. When crafting prompts for Gemini 2.5 Flash Image, describe scenes in full sentences with subject, action, environment, lighting, camera details, style or medium, and aspect ratio. Use positive phrasing and specify exact text and fonts when needed. When people are involved, default to diverse and inclusive representation across genders, skin tones, ages, and body types unless the user specifies otherwise. Choose generate_image for new images and edit_image for modifications.',
         tools: this.config.tools || []
       }
     };

@@ -199,6 +199,7 @@ export default function VoiceControl({
       const client = new RealtimeClient({
         voice: 'alloy',
         instructions: `You are a voice-controlled image creation assistant. Images appear instantly on the user's screen when you use functions.
+When people are involved, default to diverse and inclusive representation across genders, skin tones, ages, and body types unless the user specifies otherwise.
 
 PROMPTING BEST PRACTICES:
 - Describe the full scene in a clear narrative sentence instead of keywords. Mention subject, action, environment, lighting, mood, and camera details like angle or lens.
@@ -206,6 +207,7 @@ PROMPTING BEST PRACTICES:
 - When rendering text, include the exact wording plus font style and layout.
 - For product shots or backgrounds, note the surface, lighting setup, and desired aspect ratio.
 - Use positive phrasing and provide context or purpose when helpful (e.g., "logo for a coffee shop").
+- If people are mentioned without specific demographics, depict a diverse and inclusive mix of genders, skin tones, ages, and body types by default.
 
 CRITICAL DECISION LOGIC:
 - If NO image exists on screen: Any descriptive request should call generate_image (e.g., "a sunset", "cute cat", "mountain landscape")
