@@ -35,11 +35,11 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      return 'Please upload JPG, PNG, or WebP files.';
+      return 'Please upload JPG, PNG, WebP, or HEIC files.';
     }
 
     if (file.size > maxSize) {
@@ -147,7 +147,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           onChange={handleFileSelect}
           disabled={disabled || isUploading}
         />
@@ -183,7 +183,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           onChange={handleFileSelect}
           disabled={disabled || isUploading}
         />
@@ -239,7 +239,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           onChange={handleFileSelect}
           disabled={disabled || isUploading}
         />
@@ -276,7 +276,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           onChange={handleFileSelect}
           disabled={disabled || isUploading}
         />

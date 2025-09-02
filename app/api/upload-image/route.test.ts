@@ -95,7 +95,32 @@ describe('POST /api/upload-image', () => {
     const res = await POST(req as any);
     expect(res.status).toBe(400);
     const data = await res.json();
-    expect(data.error).toBe('Please upload JPG, PNG, or WebP files.');
+    expect(data.error).toBe('Please upload JPG, PNG, WebP, or HEIC files.');
+  });
+
+  it('accepts HEIC files', async () => {
+    const { POST } = await import('./route');
+    const formData = new FormData();
+    const file = new File(['test'], 'test.heic', { type: 'image/heic' });
+    formData.append('file', file);
+    formData.append('session_id', 's1');
+
+    imageSize.mockImplementationOnce(() => {
+      throw new Error('unsupported file type');
+    });
+    storeImage.mockReturnValueOnce('img123');
+    getSessionUsage.mockReturnValueOnce({ imagesUsed: 1, maxImages: 5 });
+
+    const req = new NextRequest('http://localhost', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const res = await POST(req as any);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.image_id).toBe('img123');
+    expect(data.metadata.format).toBe('heic');
   });
 
   it('returns 400 for file too large', async () => {
