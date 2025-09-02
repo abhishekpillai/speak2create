@@ -168,7 +168,8 @@ export default function VoiceControl({
     const analyser = audioContext.createAnalyser();
     const source = audioContext.createMediaStreamSource(stream);
     source.connect(analyser);
-    analyser.connect(audioContext.destination);
+    // Only analyze the AI audio without routing it back to the speakers
+    // to prevent duplicate playback alongside the existing audio element
     analyser.fftSize = 256;
     aiAnalyserRef.current = analyser;
 
