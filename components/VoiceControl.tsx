@@ -547,17 +547,29 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
         {/* Command Suggestions */}
         <div className="mt-4 flex flex-wrap gap-2">
           <span className="text-xs text-gray-500">Try saying:</span>
-          <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+          <button
+            className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors"
+            onClick={() => onMemeGenerateRef.current('drake')}
+          >
             "Create a Drake meme"
           </button>
-          <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+          <button
+            className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors"
+            onClick={() => onImageGenerateRef.current('sunset over mountains')}
+          >
             "Generate a sunset over mountains"
           </button>
-          <button className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+          <button
+            className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors"
+            onClick={() => onImageGenerateRef.current('cute robot')}
+          >
             "Create a cute robot"
           </button>
           {currentImage && (
-            <button className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200 transition-colors">
+            <button
+              className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200 transition-colors"
+              onClick={() => onImageEditRef.current('make it more colorful')}
+            >
               "Make it more colorful"
             </button>
           )}

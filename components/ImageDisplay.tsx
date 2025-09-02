@@ -64,7 +64,7 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
           <div className="text-center space-y-3">
             <div className="relative">
               <Loader2 className="w-10 h-10 text-gray-400 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-10 h-10 bg-gray-200 rounded-full animate-ping" />
+              <div className="absolute inset-0 w-10 h-10 m-auto bg-gray-200 rounded-full animate-ping" />
             </div>
             <p className="text-gray-500 text-sm">Creating your vision...</p>
           </div>
@@ -191,7 +191,7 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
           <div className="text-center space-y-3">
             <div className="relative">
               <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
+              <div className="absolute inset-0 w-12 h-12 m-auto bg-purple-500/20 rounded-full animate-ping" />
             </div>
             <p className="text-gray-500 text-sm">Creating your vision...</p>
           </div>
@@ -317,7 +317,7 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
         <div className="flex flex-col items-center justify-center h-full space-y-4">
           <div className="relative">
             <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
-            <div className="absolute inset-0 w-16 h-16 bg-purple-500/20 rounded-full animate-ping" />
+            <div className="absolute inset-0 w-16 h-16 m-auto bg-purple-500/20 rounded-full animate-ping" />
           </div>
           <p className="text-gray-700 font-medium text-lg">Creating your vision...</p>
           <p className="text-sm text-gray-500">This may take a few seconds</p>
