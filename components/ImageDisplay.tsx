@@ -61,12 +61,15 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
     if (isLoading) {
       return (
         <div className="aspect-[4/3] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="text-center space-y-3">
-            <div className="relative">
-              <Loader2 className="w-10 h-10 text-gray-400 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-10 h-10 bg-gray-200 rounded-full animate-ping" />
+          <div className="text-center space-y-4">
+            <div className="relative flex items-center justify-center w-16 h-16 mx-auto">
+              {/* Main spinning circle */}
+              <div className="absolute inset-0 rounded-full border-4 border-gray-200 animate-spin border-t-gray-400"></div>
+              
+              {/* Pulsing background */}
+              <div className="absolute inset-0 bg-gray-300 rounded-full animate-ping opacity-20"></div>
             </div>
-            <p className="text-gray-500 text-sm">Creating your vision...</p>
+            <p className="text-gray-600 text-sm font-medium">Creating your vision...</p>
           </div>
         </div>
       );
@@ -187,13 +190,16 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
     // Compact layout for above-the-fold design
     if (isLoading) {
       return (
-        <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-lg border border-purple-100">
+        <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-lg border border-gray-100">
           <div className="text-center space-y-3">
-            <div className="relative">
-              <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
+            <div className="relative flex items-center justify-center w-12 h-12 mx-auto">
+              {/* Main spinning circle */}
+              <div className="absolute inset-0 rounded-full border-4 border-gray-200 animate-spin border-t-gray-400"></div>
+              
+              {/* Pulsing background */}
+              <div className="absolute inset-0 bg-gray-300 rounded-full animate-ping opacity-20"></div>
             </div>
-            <p className="text-gray-500 text-sm">Creating your vision...</p>
+            <p className="text-gray-600 text-sm font-medium">Creating your vision...</p>
           </div>
         </div>
       );
@@ -313,14 +319,20 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
   // Original non-compact layout code remains the same...
   if (isLoading) {
     return (
-      <div className="w-full aspect-[4/3] bg-white rounded-2xl shadow-xl border border-purple-100">
+      <div className="w-full aspect-[4/3] bg-white rounded-2xl shadow-xl border border-gray-100">
         <div className="flex flex-col items-center justify-center h-full space-y-4">
-          <div className="relative">
-            <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
-            <div className="absolute inset-0 w-16 h-16 bg-purple-500/20 rounded-full animate-ping" />
+          <div className="relative flex items-center justify-center w-20 h-20 mx-auto">
+            {/* Main spinning circle */}
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200 animate-spin border-t-gray-400"></div>
+            
+            {/* Pulsing background */}
+            <div className="absolute inset-0 bg-gray-300 rounded-full animate-ping opacity-20"></div>
           </div>
-          <p className="text-gray-700 font-medium text-lg">Creating your vision...</p>
-          <p className="text-sm text-gray-500">This may take a few seconds</p>
+          
+          <div className="text-center space-y-2">
+            <p className="text-gray-700 font-semibold text-lg">Creating your vision...</p>
+            <p className="text-sm text-gray-500">This may take a few seconds</p>
+          </div>
         </div>
       </div>
     );

@@ -239,22 +239,22 @@ export default function Home() {
               <div className="space-y-2">
                 {!currentImage ? (
                   <>
-                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                       "Create a Drake meme about coffee"
                     </div>
-                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                       "Generate a sunset over mountains"
                     </div>
-                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                       Upload a photo to edit
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                       "Make the sky more vibrant"
                     </div>
-                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer shadow-sm">
+                    <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                       "Add some warm lighting"
                     </div>
                   </>
