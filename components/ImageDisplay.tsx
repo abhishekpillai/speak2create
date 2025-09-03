@@ -60,35 +60,16 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
     // Centered layout - smaller image, stacked controls
     if (isLoading) {
       return (
-        <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-indigo-50 rounded-2xl shadow-sm border border-gray-100">
+        <div className="aspect-[4/3] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="text-center space-y-4">
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center w-16 h-16 mx-auto">
               {/* Main spinning circle */}
-              <div className="w-16 h-16 relative">
-                <div className="absolute inset-0 rounded-full border-4 border-purple-200 animate-spin border-t-purple-500"></div>
-                <div className="absolute inset-2 rounded-full border-2 border-indigo-200 animate-spin border-b-indigo-500" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
-              </div>
+              <div className="absolute inset-0 rounded-full border-4 border-gray-200 animate-spin border-t-gray-400"></div>
               
               {/* Pulsing background */}
-              <div className="absolute inset-0 w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full animate-ping opacity-20"></div>
-              
-              {/* Dancing dots */}
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                <div className="flex space-x-1">
-                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-              </div>
+              <div className="absolute inset-0 bg-gray-300 rounded-full animate-ping opacity-20"></div>
             </div>
-            <div className="space-y-1">
-              <p className="text-gray-700 font-medium">Creating your vision...</p>
-              <div className="flex items-center justify-center space-x-1">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-              </div>
-            </div>
+            <p className="text-gray-600 text-sm font-medium">Creating your vision...</p>
           </div>
         </div>
       );
@@ -209,26 +190,14 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
     // Compact layout for above-the-fold design
     if (isLoading) {
       return (
-        <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-indigo-50 rounded-xl shadow-lg border border-purple-100">
+        <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-lg border border-gray-100">
           <div className="text-center space-y-3">
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center w-12 h-12 mx-auto">
               {/* Main spinning circle */}
-              <div className="w-12 h-12 relative">
-                <div className="absolute inset-0 rounded-full border-4 border-purple-200 animate-spin border-t-purple-500"></div>
-                <div className="absolute inset-2 rounded-full border-2 border-indigo-200 animate-spin border-b-indigo-500" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
-              </div>
+              <div className="absolute inset-0 rounded-full border-4 border-gray-200 animate-spin border-t-gray-400"></div>
               
               {/* Pulsing background */}
-              <div className="absolute inset-0 w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full animate-ping opacity-20"></div>
-              
-              {/* Dancing dots */}
-              <div className="absolute -top-1.5 left-1/2 transform -translate-x-1/2">
-                <div className="flex space-x-1">
-                  <div className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-              </div>
+              <div className="absolute inset-0 bg-gray-300 rounded-full animate-ping opacity-20"></div>
             </div>
             <p className="text-gray-600 text-sm font-medium">Creating your vision...</p>
           </div>
@@ -350,46 +319,19 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
   // Original non-compact layout code remains the same...
   if (isLoading) {
     return (
-      <div className="w-full aspect-[4/3] bg-gradient-to-br from-purple-50 via-white to-indigo-50 rounded-2xl shadow-xl border border-purple-100">
-        <div className="flex flex-col items-center justify-center h-full space-y-6">
-          <div className="relative flex items-center justify-center">
-            {/* Main spinning rings */}
-            <div className="w-20 h-20 relative">
-              <div className="absolute inset-0 rounded-full border-4 border-purple-200 animate-spin border-t-purple-500"></div>
-              <div className="absolute inset-2 rounded-full border-3 border-indigo-200 animate-spin border-b-indigo-500" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
-              <div className="absolute inset-4 rounded-full border-2 border-purple-300 animate-spin border-l-purple-600" style={{ animationDuration: '1.2s' }}></div>
-            </div>
+      <div className="w-full aspect-[4/3] bg-white rounded-2xl shadow-xl border border-gray-100">
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
+          <div className="relative flex items-center justify-center w-20 h-20 mx-auto">
+            {/* Main spinning circle */}
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200 animate-spin border-t-gray-400"></div>
             
             {/* Pulsing background */}
-            <div className="absolute inset-0 w-20 h-20 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full animate-ping opacity-20"></div>
-            
-            {/* Orbital dots */}
-            <div className="absolute inset-0 w-20 h-20">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1">
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              </div>
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
-              </div>
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1">
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></div>
-              </div>
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '600ms' }}></div>
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-gray-300 rounded-full animate-ping opacity-20"></div>
           </div>
           
           <div className="text-center space-y-2">
             <p className="text-gray-700 font-semibold text-lg">Creating your vision...</p>
             <p className="text-sm text-gray-500">This may take a few seconds</p>
-            <div className="flex items-center justify-center space-x-2 mt-3">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
-              <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.9s' }}></div>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '1.2s' }}></div>
-            </div>
           </div>
         </div>
       </div>
