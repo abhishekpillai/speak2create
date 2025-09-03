@@ -62,9 +62,9 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
       return (
         <div className="aspect-[4/3] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="text-center space-y-3">
-            <div className="relative">
-              <Loader2 className="w-10 h-10 text-gray-400 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-10 h-10 bg-gray-200 rounded-full animate-ping" />
+            <div className="relative w-10 h-10 mx-auto">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-500 to-indigo-400 opacity-75 animate-ping" />
+              <Loader2 className="w-10 h-10 text-purple-600 animate-spin relative z-10" />
             </div>
             <p className="text-gray-500 text-sm">Creating your vision...</p>
           </div>
@@ -189,9 +189,9 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
       return (
         <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-lg border border-purple-100">
           <div className="text-center space-y-3">
-            <div className="relative">
-              <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto" />
-              <div className="absolute inset-0 w-12 h-12 bg-purple-500/20 rounded-full animate-ping" />
+            <div className="relative w-12 h-12 mx-auto">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-500 to-indigo-400 opacity-75 animate-ping" />
+              <Loader2 className="w-12 h-12 text-purple-600 animate-spin relative z-10" />
             </div>
             <p className="text-gray-500 text-sm">Creating your vision...</p>
           </div>
@@ -315,9 +315,9 @@ export default function ImageDisplay({ imageUrl, isLoading, onClear, compact = f
     return (
       <div className="w-full aspect-[4/3] bg-white rounded-2xl shadow-xl border border-purple-100">
         <div className="flex flex-col items-center justify-center h-full space-y-4">
-          <div className="relative">
-            <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
-            <div className="absolute inset-0 w-16 h-16 bg-purple-500/20 rounded-full animate-ping" />
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-500 to-indigo-400 opacity-75 animate-ping" />
+            <Loader2 className="w-16 h-16 text-purple-600 animate-spin relative z-10" />
           </div>
           <p className="text-gray-700 font-medium text-lg">Creating your vision...</p>
           <p className="text-sm text-gray-500">This may take a few seconds</p>
