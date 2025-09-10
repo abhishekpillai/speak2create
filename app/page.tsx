@@ -246,7 +246,7 @@ export default function Home() {
                       "Generate a sunset over mountains"
                     </div>
                     <div className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
-                      Upload a photo to edit
+                      Upload a photo to edit with voice
                     </div>
                   </>
                 ) : (
@@ -286,22 +286,13 @@ export default function Home() {
                   onClear={handleClear}
                   centered={true}
                 />
-              ) : sessionStarted ? (
+              ) : (
                 <ImageUploader
                   sessionId={sessionId}
                   onUpload={handleImageUpload}
                   onError={handleUploadError}
                   disabled={isLoading}
                   placeholder={true}
-                />
-              ) : (
-                <ImageUploader
-                  sessionId={sessionId}
-                  onUpload={handleImageUpload}
-                  onError={handleUploadError}
-                  disabled={true}
-                  placeholder={true}
-                  inactiveMessage="Click Start Creating to begin"
                 />
               )}
             </div>
@@ -350,7 +341,7 @@ export default function Home() {
                       "Generate a sunset"
                     </span>
                     <span className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
-                      Upload & edit
+                      Upload & edit with voice
                     </span>
                   </>
                 ) : (

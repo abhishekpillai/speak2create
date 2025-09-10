@@ -61,6 +61,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate image size for Gemini API (7MB limit for the original file)
+    // Base64 encoding adds ~33% overhead, but we check original size
+    let originalImageSize = 0;
+    if (base_image_id) {
+      // For uploaded images, get the original buffer size
+      const stored = sessionImageStore.getImage(session_id, base_image_id);
+      originalImageSize = stored?.data.length || 0;
+    } else if (image_data) {
+      // For generated images, estimate original size from base64
+      const base64Data = image_data.split(',')[1] || '';
+      originalImageSize = Math.floor((base64Data.length * 3) / 4);
+    }
+    
+    // Gemini API has a 7MB limit per image
+    const geminiMaxSize = 7 * 1024 * 1024; // 7MB
+    if (originalImageSize > geminiMaxSize) {
+      return NextResponse.json(
+        { 
+          error: 'Image too large for editing',
+          message: 'This image is too large for our AI to process. Please try using standard photo mode instead of RAW/ProRAW, or resize the image to under 7MB.'
+        },
+        { status: 400 }
+      );
+    }
+
     const vipSecrets = (process.env.VIP_SECRETS || '')
       .split(',')
       .map(s => s.trim())
