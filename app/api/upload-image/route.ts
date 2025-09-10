@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Please upload JPG, PNG, WebP, or HEIC files.' }, { status: 400 });
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'Image too large (max 5MB). Please resize and try again.' }, { status: 400 });
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Image too large (max 10MB). Please resize and try again.' }, { status: 400 });
     }
 
     const arrayBuffer = await file.arrayBuffer();

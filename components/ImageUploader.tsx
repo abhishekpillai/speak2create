@@ -36,14 +36,14 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
 
   const validateFile = (file: File): string | null => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 10 * 1024 * 1024; // 10MB
 
     if (!allowedTypes.includes(file.type)) {
       return 'Please upload JPG, PNG, WebP, or HEIC files.';
     }
 
     if (file.size > maxSize) {
-      return 'Image too large (max 5MB). Please resize and try again.';
+      return 'Image too large (max 10MB). Please resize and try again.';
     }
 
     return null;
@@ -306,7 +306,7 @@ export default function ImageUploader({ sessionId, onUpload, onError, disabled =
               </p>
             </div>
             <div className="text-xs text-gray-400">
-              Supports JPG, PNG, WebP • Max 5MB
+              Supports JPG, PNG, WebP • Max 10MB
             </div>
           </div>
         )}

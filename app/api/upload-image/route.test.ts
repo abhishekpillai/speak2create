@@ -129,8 +129,8 @@ describe('POST /api/upload-image', () => {
   it('returns 400 for file too large', async () => {
     const { POST } = await import('./route');
     const formData = new FormData();
-    // Create a file that's larger than 5MB
-    const largeBuffer = new ArrayBuffer(6 * 1024 * 1024); // 6MB
+    // Create a file that's larger than 10MB
+    const largeBuffer = new ArrayBuffer(11 * 1024 * 1024); // 11MB
     const file = new File([largeBuffer], 'large.jpg', { type: 'image/jpeg' });
     formData.append('file', file);
     formData.append('session_id', 's1');
@@ -143,7 +143,7 @@ describe('POST /api/upload-image', () => {
     const res = await POST(req as any);
     expect(res.status).toBe(400);
     const data = await res.json();
-    expect(data.error).toBe('Image too large (max 5MB). Please resize and try again.');
+    expect(data.error).toBe('Image too large (max 10MB). Please resize and try again.');
   });
 
   it('returns 429 when IP rate limit exceeded', async () => {
