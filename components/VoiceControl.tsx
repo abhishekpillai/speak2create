@@ -370,6 +370,12 @@ User: "Add some palm trees" (with beach showing) → You: "Adding palm trees..."
       await client.connect(token);
       clientRef.current = client;
 
+      // Send context if an image was uploaded before the session started
+      if (currentImageRef.current) {
+        console.log('📤 Sending initial context: Image already available');
+        client.sendContext('Context update: An image is now displayed on screen and available for editing.');
+      }
+
       // Set up audio visualization
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
